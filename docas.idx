@@ -1,0 +1,14 @@
+f | LICENSE.txt | g | 1.4K |  | Klaus Silveira | contact@klaussilveira.com | 1337315913 |  | Initial commit
+f | composer.json | g | 275B |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644258 |  | fixed URL management
+d | web |  | 5 items |  | Klaus Silveira | contact@klaussilveira.com | 1341584568 |  | Fixing bug in the commit header bar with long commit messages
+f | README.md | s | 5.0K | 65 | Klaus Silveira | contact@klaussilveira.com | 1341889720 |  | It seems that Markdown doesn't like () inside URL's. Escaping!
+f | phpunit.xml.dist | g | 702B |  | Klaus Silveira | contact@klaussilveira.com | 1341447587 |  | Adding JUnit and Clover logging to test suite
+f | index.php | s | 1.7K | 44 | Fabien Potencier | fabien.potencier@gmail.com | 1341644258 |  | fixed URL management
+f | build.xml | g | 3.3K |  | Klaus Silveira | contact@klaussilveira.com | 1341464944 |  | Adding a target for packaging the application in a single tarball
+d | tests |  | 1 items |  | Klaus Silveira | contact@klaussilveira.com | 1341414626 |  | Using Composer autoloader for test suite, making Travis support Composer to run test suite properly
+d | views |  | 16 items |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | moved the page variable to the templates (belongs to the view)
+d | nginx |  | 1 items |  | Tatsh | ddrtist@gmail.com | 1337469240 |  | Fix rule
+d | lib |  | 2 items |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | fixed blame when the file has been renamed (in which case the blame command returns the file name in the output)
+d | controllers |  | 6 items |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | removed some / at the end of some URLs to be consistent with other URLs
+f | composer.lock | g | 3.2K |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644258 |  | fixed URL management
+f | config.ini-example | g | 388B |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644258 |  | fixed URL management

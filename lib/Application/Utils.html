@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html><head><title>joekychen/gitlist » lib › Application › Utils.php
+
+</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="generator" content="Docco">
+<link rel="stylesheet" media="all" href="../../stylesheets/docco.min.css" />
+
+
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead><tr><th class="docs"><a id="home" href="../../index.html"></a><h1>Utils.php</h1></th><th class="code"></th></tr></thead>
+<tbody>
+
+
+<tr id="section-1"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div></td><td class="code"><div class="highlight"><pre><span class="cp">&lt;?php</span>
+
+<span class="k">namespace</span> <span class="nx">Application</span><span class="p">;</span>
+
+<span class="k">use</span> <span class="nx">Silex\Application</span><span class="p">;</span>
+
+<span class="sd">/**</span>
+<span class="sd"> * General helper class, mostly used for string parsing inside the application controllers</span>
+<span class="sd"> */</span>
+<span class="k">class</span> <span class="nc">Utils</span>
+<span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$app</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">__construct</span><span class="p">(</span><span class="nx">Application</span> <span class="nv">$app</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">app</span> <span class="o">=</span> <span class="nv">$app</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Builds a breadcrumb array based on a path spec</span>
+<span class="sd">     * </span>
+<span class="sd">     * @param string $spec Path spec</span>
+<span class="sd">     * @return array Array with parts of the breadcrumb</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getBreadcrumbs</span><span class="p">(</span><span class="nv">$spec</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$spec</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">array</span><span class="p">();</span>
+        <span class="p">}</span>
+
+        <span class="nv">$paths</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="nv">$spec</span><span class="p">);</span>
+
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$paths</span> <span class="k">as</span> <span class="nv">$i</span> <span class="o">=&gt;</span> <span class="nv">$path</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$breadcrumbs</span><span class="p">[]</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span>
+                <span class="s1">&#39;dir&#39;</span>  <span class="o">=&gt;</span> <span class="nv">$path</span><span class="p">,</span>
+                <span class="s1">&#39;path&#39;</span> <span class="o">=&gt;</span> <span class="nb">implode</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="nb">array_slice</span><span class="p">(</span><span class="nv">$paths</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nv">$i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
+            <span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="nv">$breadcrumbs</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Returns the file type based on filename by treating the extension</span>
+<span class="sd">     *</span>
+<span class="sd">     * The file type is used by CodeMirror, a Javascript-based IDE implemented in</span>
+<span class="sd">     * GitList, to properly highlight the blob syntax (if it&#39;s a source-code)</span>
+<span class="sd">     * </span>
+<span class="sd">     * @param string $spec File name</span>
+<span class="sd">     * @return string File type</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getFileType</span><span class="p">(</span><span class="nv">$file</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">((</span><span class="nv">$pos</span> <span class="o">=</span> <span class="nb">strrpos</span><span class="p">(</span><span class="nv">$file</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">))</span> <span class="o">!==</span> <span class="k">FALSE</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$fileType</span> <span class="o">=</span> <span class="nx">substr</span><span class="p">(</span><span class="nv">$file</span><span class="p">,</span> <span class="nv">$pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s1">&#39;text&#39;</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">switch</span> <span class="p">(</span><span class="nv">$fileType</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">case</span> <span class="s1">&#39;php&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;php&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;c&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;clike&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;h&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;clike&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;cpp&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;clike&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;cs&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;csharp&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;m&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;clike&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;mm&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;clike&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;java&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;java&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;clj&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;clojure&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;coffee&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;coffeescript&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;css&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;css&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;diff&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;diff&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;ecl&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;ecl&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;el&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;erlang&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;go&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;go&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;groovy&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;groovy&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;hs&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;haskell&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;lhs&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;haskell&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;jsp&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;htmlembedded&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;asp&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;htmlembedded&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;aspx&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;htmlembedded&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;html&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;htmlmixed&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;tpl&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;htmlmixed&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;js&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;javascript&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;json&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;javascript&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;less&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;less&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;lua&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;lua&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;md&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;markdown&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;markdown&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;markdown&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;sql&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;mysql&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;pl&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;perl&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;pm&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;perl&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;pas&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;pascal&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;ini&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;properties&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;cfg&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;properties&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;nt&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;ntriples&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;py&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;python&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;rb&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;ruby&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;rst&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;rst&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;r&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;r&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;sh&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;shell&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;ss&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;scheme&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;scm&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;scheme&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;sls&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;scheme&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;sps&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;scheme&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;rs&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;rust&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;st&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;smalltalk&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;tex&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;stex&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;vbs&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;vbscript&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;v&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;verilog&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;xml&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;xsd&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;xsl&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;xul&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;xlf&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;xliff&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;xaml&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;wxs&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;wxl&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;wxi&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;wsdl&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;svg&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;rss&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;rdf&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;plist&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;mxml&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;kml&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;glade&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;xq&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xquery&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;xqm&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xquery&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;xquery&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xquery&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;xqy&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;xquery&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;yml&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;yaml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;yaml&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;yaml&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;png&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;image&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;jpg&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;image&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;gif&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;image&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;jpeg&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;image&#39;</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s1">&#39;bmp&#39;</span><span class="o">:</span>
+                <span class="k">return</span> <span class="s1">&#39;image&#39;</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">app</span><span class="p">[</span><span class="s1">&#39;filetypes&#39;</span><span class="p">]))</span> <span class="p">{</span>
+            <span class="k">foreach</span> <span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">app</span><span class="p">[</span><span class="s1">&#39;filetypes&#39;</span><span class="p">]</span> <span class="k">as</span> <span class="nv">$ext</span> <span class="o">=&gt;</span> <span class="nv">$type</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nv">$fileType</span> <span class="o">==</span> <span class="nv">$ext</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="nv">$type</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getPager</span><span class="p">(</span><span class="nv">$pageNumber</span><span class="p">,</span> <span class="nv">$totalCommits</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$pageNumber</span> <span class="o">=</span> <span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$pageNumber</span><span class="p">))</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="nv">$pageNumber</span><span class="p">;</span>
+        <span class="nv">$lastPage</span> <span class="o">=</span> <span class="nb">intval</span><span class="p">(</span><span class="nv">$totalCommits</span> <span class="o">/</span> <span class="mi">15</span><span class="p">);</span></pre></div></td></tr>
+
+
+<tr id="section-2"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-2">&#182;</a></div><p>If total commits are integral multiple of 15, the lastPage will be commits/15 - 1.</p></td><td class="code"><div class="highlight"><pre>        <span class="nv">$lastPage</span> <span class="o">=</span> <span class="p">(</span><span class="nv">$lastPage</span> <span class="o">*</span> <span class="mi">15</span> <span class="o">==</span> <span class="nv">$totalCommits</span><span class="p">)</span> <span class="o">?</span> <span class="nv">$lastPage</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">:</span> <span class="nv">$lastPage</span><span class="p">;</span>
+        <span class="nv">$nextPage</span> <span class="o">=</span> <span class="nv">$pageNumber</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="nv">$previousPage</span> <span class="o">=</span> <span class="nv">$pageNumber</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+
+        <span class="k">return</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;current&#39;</span> <span class="o">=&gt;</span> <span class="nv">$pageNumber</span><span class="p">,</span>
+                     <span class="s1">&#39;next&#39;</span> <span class="o">=&gt;</span> <span class="nv">$nextPage</span><span class="p">,</span>
+                     <span class="s1">&#39;previous&#39;</span> <span class="o">=&gt;</span> <span class="nv">$previousPage</span><span class="p">,</span>
+                     <span class="s1">&#39;last&#39;</span> <span class="o">=&gt;</span> <span class="nv">$lastPage</span><span class="p">,</span>
+                     <span class="s1">&#39;total&#39;</span> <span class="o">=&gt;</span> <span class="nv">$totalCommits</span><span class="p">,</span>
+        <span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getReadme</span><span class="p">(</span><span class="nv">$repo</span><span class="p">,</span> <span class="nv">$branch</span> <span class="o">=</span> <span class="s1">&#39;master&#39;</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">app</span><span class="p">[</span><span class="s1">&#39;git&#39;</span><span class="p">]</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">app</span><span class="p">[</span><span class="s1">&#39;git.repos&#39;</span><span class="p">]</span> <span class="o">.</span> <span class="nv">$repo</span><span class="p">);</span>
+        <span class="nv">$files</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getTree</span><span class="p">(</span><span class="nv">$branch</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">output</span><span class="p">();</span>
+
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$files</span> <span class="k">as</span> <span class="nv">$fileInfo</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">preg_match</span><span class="p">(</span><span class="s1">&#39;/^readme*/i&#39;</span><span class="p">,</span> <span class="nv">$fileInfo</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span> <span class="o">=&gt;</span> <span class="nv">$fileInfo</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="s1">&#39;content&#39;</span> <span class="o">=&gt;</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getBlob</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">$branch</span><span class="s2">:&#39;&quot;</span><span class="o">.</span><span class="nv">$fileInfo</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">output</span><span class="p">());</span>
+            <span class="p">}</span>
+        <span class="k">return</span> <span class="k">array</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+</pre></div></td></tr>
+
+</tbody>
+</table>
+</div>
+
+</body>
+<script>docas={repo:"joekychen/gitlist",depth:2}</script>
+<script>document.write('<script src=' + ('__proto__' in {} ? 'http://cdnjs.cloudflare.com/ajax/libs/zepto/1.0rc1/zepto.min.js' : 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')+'><\\/script>')</script>
+<script src="http://baoshan.github.com/moment/min/moment.min.js"></script>
+<script src="../../javascript/docco.min.js"></script>
+</html>

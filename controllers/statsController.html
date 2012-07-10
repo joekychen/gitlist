@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html><head><title>joekychen/gitlist » controllers › statsController.php
+
+</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="generator" content="Docco">
+<link rel="stylesheet" media="all" href="../stylesheets/docco.min.css" />
+
+
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead><tr><th class="docs"><a id="home" href="../index.html"></a><h1>statsController.php</h1></th><th class="code"></th></tr></thead>
+<tbody>
+
+
+<tr id="section-1"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div></td><td class="code"><div class="highlight"><pre><span class="cp">&lt;?php</span>
+
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;{repo}/stats/{branch}&#39;</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nv">$repo</span><span class="p">,</span> <span class="nv">$branch</span><span class="p">)</span> <span class="k">use</span><span class="p">(</span><span class="nv">$app</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$app</span><span class="p">[</span><span class="s1">&#39;git&#39;</span><span class="p">]</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$app</span><span class="p">[</span><span class="s1">&#39;git.repos&#39;</span><span class="p">]</span> <span class="o">.</span> <span class="nv">$repo</span><span class="p">);</span>
+    <span class="nv">$stats</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getStatistics</span><span class="p">(</span><span class="nv">$branch</span><span class="p">);</span>
+    <span class="nv">$authors</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getAuthorStatistics</span><span class="p">();</span>
+
+    <span class="k">return</span> <span class="nv">$app</span><span class="p">[</span><span class="s1">&#39;twig&#39;</span><span class="p">]</span><span class="o">-&gt;</span><span class="na">render</span><span class="p">(</span><span class="s1">&#39;stats.twig&#39;</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span>
+        <span class="s1">&#39;repo&#39;</span>           <span class="o">=&gt;</span> <span class="nv">$repo</span><span class="p">,</span>
+        <span class="s1">&#39;branch&#39;</span>         <span class="o">=&gt;</span> <span class="nv">$branch</span><span class="p">,</span>
+        <span class="s1">&#39;branches&#39;</span>       <span class="o">=&gt;</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getBranches</span><span class="p">(),</span>
+        <span class="s1">&#39;tags&#39;</span>           <span class="o">=&gt;</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getTags</span><span class="p">(),</span>
+        <span class="s1">&#39;stats&#39;</span>          <span class="o">=&gt;</span> <span class="nv">$stats</span><span class="p">,</span>
+        <span class="s1">&#39;authors&#39;</span>         <span class="o">=&gt;</span> <span class="nv">$authors</span><span class="p">,</span>
+    <span class="p">));</span>
+<span class="p">})</span><span class="o">-&gt;</span><span class="na">assert</span><span class="p">(</span><span class="s1">&#39;repo&#39;</span><span class="p">,</span> <span class="s1">&#39;[\w-._]+&#39;</span><span class="p">)</span>
+  <span class="o">-&gt;</span><span class="na">assert</span><span class="p">(</span><span class="s1">&#39;branch&#39;</span><span class="p">,</span> <span class="s1">&#39;[\w-._]+&#39;</span><span class="p">)</span>
+  <span class="o">-&gt;</span><span class="na">value</span><span class="p">(</span><span class="s1">&#39;branch&#39;</span><span class="p">,</span> <span class="s1">&#39;master&#39;</span><span class="p">)</span>
+  <span class="o">-&gt;</span><span class="na">bind</span><span class="p">(</span><span class="s1">&#39;stats&#39;</span><span class="p">);</span>
+
+</pre></div></td></tr>
+
+</tbody>
+</table>
+</div>
+
+</body>
+<script>docas={repo:"joekychen/gitlist",depth:1}</script>
+<script>document.write('<script src=' + ('__proto__' in {} ? 'http://cdnjs.cloudflare.com/ajax/libs/zepto/1.0rc1/zepto.min.js' : 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')+'><\\/script>')</script>
+<script src="http://baoshan.github.com/moment/min/moment.min.js"></script>
+<script src="../javascript/docco.min.js"></script>
+</html>

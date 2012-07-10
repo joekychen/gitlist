@@ -1,0 +1,1 @@
+f | ClientTest.php | s | 15K | 316 | Klaus Silveira | contact@klaussilveira.com | 1341414626 |  | Using Composer autoloader for test suite, making Travis support Composer to run test suite properly

@@ -1,0 +1,109 @@
+<h1>GitList: an elegant and modern git repository viewer</h1>
+
+<p><a href="http://travis-ci.org/klaussilveira/gitlist"><img src="https://secure.travis-ci.org/klaussilveira/gitlist.png" alt="Build Status" title="" /></a></p>
+
+<p>GitList is an elegant and modern web interface for interacting with multiple git repositories. It allows you to browse repositories using your favorite browser, viewing files under different revisions, commit history, diffs. It also generates RSS feeds for each repository, allowing you to stay up-to-date with the latest changes anytime, anywhere. GitList was written in PHP, on top of the <a href="http://silex.sensiolabs.org/">Silex</a> microframework and powered by the Twig template engine. This means that GitList is easy to install and easy to customize. Also, the GitList gorgeous interface was made possible due to <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>. </p>
+
+<h2>Features</h2>
+
+<ul>
+<li>Multiple repository support</li>
+<li>Multiple branch support</li>
+<li>Multiple tag support</li>
+<li>Commit history, blame, diff</li>
+<li>RSS feeds</li>
+<li>Syntax highlighting</li>
+<li>Repository statistics</li>
+</ul>
+
+<h2>Screenshots</h2>
+
+<p><a href="http://cloud.github.com/downloads/klaussilveira/gitlist/1.jpg"><img src="http://dl.dropbox.com/u/62064441/th1.jpg" alt="GitList Screenshot" title="" /></a>
+<a href="http://cloud.github.com/downloads/klaussilveira/gitlist/2.jpg"><img src="http://dl.dropbox.com/u/62064441/th2.jpg" alt="GitList Screenshot" title="" /></a>
+<a href="http://cloud.github.com/downloads/klaussilveira/gitlist/3.jpg"><img src="http://dl.dropbox.com/u/62064441/th3.jpg" alt="GitList Screenshot" title="" /></a>
+<a href="http://cloud.github.com/downloads/klaussilveira/gitlist/4.jpg"><img src="http://dl.dropbox.com/u/62064441/th4.jpg" alt="GitList Screenshot" title="" /></a>
+<a href="http://cloud.github.com/downloads/klaussilveira/gitlist/5.jpg"><img src="http://dl.dropbox.com/u/62064441/th5.jpg" alt="GitList Screenshot" title="" /></a></p>
+
+<p>You can also see a live demo <a href="http://git.gofedora.com">here</a>.</p>
+
+<h2>Authors and contributors</h2>
+
+<ul>
+<li><a href="http://www.klaussilveira.com">Klaus Silveira</a> (Creator, developer)</li>
+</ul>
+
+<h2>License</h2>
+
+<p><a href="http://www.opensource.org/licenses/bsd-license.php">New BSD license</a></p>
+
+<h2>Todo</h2>
+
+<ul>
+<li>improve the current test code coverage</li>
+<li>test the interface</li>
+<li>error handling can be greatly improved during parsing</li>
+<li>submodule support</li>
+<li>multilanguage support</li>
+</ul>
+
+<h2>Requirements</h2>
+
+<p>In order to run GitList on your server, you'll need:</p>
+
+<ul>
+<li>git</li>
+<li>Apache with mod_rewrite enabled or nginx</li>
+<li>PHP 5.3.3</li>
+</ul>
+
+<h2>Installing</h2>
+
+<ul>
+<li>Download GitList from <a href="http://gitlist.org/">gitlist.org</a> and decompress to your <code>/var/www/gitlist</code> folder, or anywhere else you want to place GitList. </li>
+<li>Rename the <code>config.ini-example</code> file to <code>config.ini</code>.</li>
+<li>Open up the <code>config.ini</code> and configure your installation. You'll have to provide where your repositories are located and the base GitList URL (in our case, http://localhost/gitlist).</li>
+<li>Create the cache folder and give the correct permissions:</li>
+</ul>
+
+<p><code>
+cd /var/www/gitlist
+mkdir cache
+chmod 777 cache
+</code></p>
+
+<p>That's it, installation complete! If you're having problems, check this <a href="http://gofedora.com/insanely-awesome-web-interface-git-repos/">tutorial</a> by Kulbir Saini or the <a href="https://github.com/klaussilveira/gitlist/wiki/Troubleshooting">Troubleshooting</a> page.</p>
+
+<h2>Building</h2>
+
+<p>GitList uses <a href="http://getcomposer.org/">Composer</a> to manage dependencies and <a href="http://ant.apache.org/">Ant</a> to build the project. In order to run all the targets in the build script, you will need <a href="http://www.phpunit.de/">PHPUnit</a>, <a href="https://github.com/sebastianbergmann/phpcpd">phpcpd</a>, <a href="https://github.com/sebastianbergmann/phploc">phploc</a>, <a href="http://phpmd.org/">PHPMD</a> and <a href="http://pdepend.org">PHP_Depend</a>.</p>
+
+<p>Once you have all the dependencies set, you can clone the repository and run Ant:</p>
+
+<p><code>
+git clone https://github.com/klaussilveira/gitlist.git
+ant
+</code></p>
+
+<p>If you just want to get the project dependencies, instead of building everything:</p>
+
+<p><code>
+git clone https://github.com/klaussilveira/gitlist.git
+curl -s http://getcomposer.org/installer | php
+php composer.phar install
+</code></p>
+
+<p>If you have Composer in your path, things get easier. But you know the drill.</p>
+
+<h2>Contributing</h2>
+
+<p>If you are a developer, we need your help. GitList is a young project and we have lot's of stuff to do. Some developers are contributing with new features, others with bug fixes. But you can also dedicate yourself to refactoring the current codebase and improving what we already have. This is very important, we want GitList to be a state-of-the-art application, and we need your help for that.</p>
+
+<ul>
+<li>Stay tuned to possible bugs, suboptimal code, duplicated code, overcomplicated expressions and unused code with <a href="http://ci.gitlist.org:8080/job/GitList%20(master)/9/pmdResult/?">PHPMD</a> in our CI server</li>
+<li>Try to fix any <a href="http://ci.gitlist.org:8080/job/GitList%20(master)/violations/">violations</a> reported</li>
+<li>Improve the <a href="http://ci.gitlist.org:8080/job/GitList%20(master)/9/cloverphp-report/">test coverage</a> by creating unit and functional tests</li>
+</ul>
+
+<h2>Further information</h2>
+
+<p>If you want to know more about customizing GitList, check the <a href="https://github.com/klaussilveira/gitlist/wiki/Customizing">Customization</a> page on the wiki. Also, if you're having problems with GitList, check the <a href="https://github.com/klaussilveira/gitlist/wiki/Troubleshooting">Troubleshooting</a> page. Don't forget to report issues and suggest new features! :)</p>

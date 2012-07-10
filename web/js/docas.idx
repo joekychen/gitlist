@@ -1,0 +1,6 @@
+f | main.js | s | 719B | 22 | Klaus Silveira | contact@klaussilveira.com | 1341583057 |  | The highlighter now uses a <pre> instead of a <textarea>. Much better!
+f | codemirror.js | g | 219K |  | Klaus Silveira | contact@klaussilveira.com | 1341584323 |  | Removing unused plugins from CodeMirror 2.3
+f | showdown.js | g | 9.7K |  | Michał Prochowski | michal@prochowski.pl | 1339545214 |  | Added preview of the file "readme" like in github with using showdown.js parser (http://github.com/coreyti/showdown).
+f | html5.js | g | 3.4K |  | Klaus Silveira | contact@klaussilveira.com | 1337315913 |  | Initial commit
+f | bootstrap.js | g | 20K |  | Klaus Silveira | contact@klaussilveira.com | 1337315913 |  | Initial commit
+f | jquery.js | g | 91K |  | Klaus Silveira | contact@klaussilveira.com | 1337315913 |  | Initial commit

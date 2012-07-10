@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html><head><title>joekychen/gitlist » lib › Git › Commit › Commit.php
+
+</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="generator" content="Docco">
+<link rel="stylesheet" media="all" href="../../../stylesheets/docco.min.css" />
+
+
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead><tr><th class="docs"><a id="home" href="../../../index.html"></a><h1>Commit.php</h1></th><th class="code"></th></tr></thead>
+<tbody>
+
+
+<tr id="section-1"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div></td><td class="code"><div class="highlight"><pre><span class="cp">&lt;?php</span>
+
+<span class="k">namespace</span> <span class="nx">Git\Commit</span><span class="p">;</span>
+
+<span class="k">class</span> <span class="nc">Commit</span>
+<span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$hash</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$shortHash</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$treeHash</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$parentHash</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$author</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$date</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$commiter</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$commiterDate</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$message</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$diffs</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">importData</span><span class="p">(</span><span class="k">array</span> <span class="nv">$data</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">setHash</span><span class="p">(</span><span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;hash&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">setShortHash</span><span class="p">(</span><span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;short_hash&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">setTreeHash</span><span class="p">(</span><span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;tree&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">setParentHash</span><span class="p">(</span><span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">setAuthor</span><span class="p">(</span>
+            <span class="k">new</span> <span class="nx">Author</span><span class="p">(</span><span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">],</span> <span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;author_email&#39;</span><span class="p">])</span>
+        <span class="p">);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">setDate</span><span class="p">(</span>
+            <span class="k">new</span> <span class="nx">\DateTime</span><span class="p">(</span><span class="s1">&#39;@&#39;</span> <span class="o">.</span> <span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span>
+        <span class="p">);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">setCommiter</span><span class="p">(</span>
+            <span class="k">new</span> <span class="nx">Author</span><span class="p">(</span><span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;commiter&#39;</span><span class="p">],</span> <span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;commiter_email&#39;</span><span class="p">])</span>
+        <span class="p">);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">setCommiterDate</span><span class="p">(</span>
+            <span class="k">new</span> <span class="nx">\DateTime</span><span class="p">(</span><span class="s1">&#39;@&#39;</span> <span class="o">.</span> <span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;commiter_date&#39;</span><span class="p">])</span>
+        <span class="p">);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">setMessage</span><span class="p">(</span><span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]);</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getHash</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">hash</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">setHash</span><span class="p">(</span><span class="nv">$hash</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">hash</span> <span class="o">=</span> <span class="nv">$hash</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getShortHash</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">shortHash</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">setShortHash</span><span class="p">(</span><span class="nv">$shortHash</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">shortHash</span> <span class="o">=</span> <span class="nv">$shortHash</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getTreeHash</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">treeHash</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">setTreeHash</span><span class="p">(</span><span class="nv">$treeHash</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">treeHash</span> <span class="o">=</span> <span class="nv">$treeHash</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getParentHash</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">parentHash</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">setParentHash</span><span class="p">(</span><span class="nv">$parentHash</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">parentHash</span> <span class="o">=</span> <span class="nv">$parentHash</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getAuthor</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">author</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">setAuthor</span><span class="p">(</span><span class="nv">$author</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">author</span> <span class="o">=</span> <span class="nv">$author</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getDate</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">date</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">setDate</span><span class="p">(</span><span class="nv">$date</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">date</span> <span class="o">=</span> <span class="nv">$date</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getCommiter</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">commiter</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">setCommiter</span><span class="p">(</span><span class="nv">$commiter</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">commiter</span> <span class="o">=</span> <span class="nv">$commiter</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getCommiterDate</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">commiterDate</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">setCommiterDate</span><span class="p">(</span><span class="nv">$commiterDate</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">commiterDate</span> <span class="o">=</span> <span class="nv">$commiterDate</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getMessage</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">message</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">setMessage</span><span class="p">(</span><span class="nv">$message</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">message</span> <span class="o">=</span> <span class="nv">$message</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getDiffs</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">diffs</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">setDiffs</span><span class="p">(</span><span class="nv">$diffs</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">diffs</span> <span class="o">=</span> <span class="nv">$diffs</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getChangedFiles</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nb">sizeof</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">diffs</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+</pre></div></td></tr>
+
+</tbody>
+</table>
+</div>
+
+</body>
+<script>docas={repo:"joekychen/gitlist",depth:3}</script>
+<script>document.write('<script src=' + ('__proto__' in {} ? 'http://cdnjs.cloudflare.com/ajax/libs/zepto/1.0rc1/zepto.min.js' : 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')+'><\\/script>')</script>
+<script src="http://baoshan.github.com/moment/min/moment.min.js"></script>
+<script src="../../../javascript/docco.min.js"></script>
+</html>

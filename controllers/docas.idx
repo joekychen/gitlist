@@ -1,0 +1,6 @@
+f | treeController.php | s | 1.5K | 38 | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | moved the page variable to the templates (belongs to the view)
+f | indexController.php | s | 241B | 7 | Fabien Potencier | fabien.potencier@gmail.com | 1341644258 |  | fixed URL management
+f | rssController.php | s | 570B | 13 | Fabien Potencier | fabien.potencier@gmail.com | 1341644258 |  | fixed URL management
+f | commitController.php | s | 2.1K | 52 | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | removed some / at the end of some URLs to be consistent with other URLs
+f | statsController.php | s | 683B | 17 | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | moved the page variable to the templates (belongs to the view)
+f | blobController.php | s | 1.2K | 28 | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | removed some / at the end of some URLs to be consistent with other URLs

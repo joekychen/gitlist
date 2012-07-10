@@ -1,0 +1,5 @@
+f | Symlink.php | s | 610B | 35 | Klaus Silveira | contact@klaussilveira.com | 1337315913 |  | Initial commit
+f | Diff.php | s | 918B | 51 | Klaus Silveira | contact@klaussilveira.com | 1339047150 |  | Better filename handling in commit logs, fixes #35
+f | Line.php | s | 772B | 38 | Klaus Silveira | contact@klaussilveira.com | 1337315913 |  | Initial commit
+f | Tree.php | s | 4.3K | 141 | Klaus Silveira | contact@klaussilveira.com | 1338439596 |  | Correct handling of filenames with spaces. Fixes #25
+f | Blob.php | s | 1.1K | 54 | Klaus Silveira | contact@klaussilveira.com | 1337315913 |  | Initial commit

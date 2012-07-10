@@ -1,0 +1,2 @@
+d | Application |  | 2 items |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | refactored the tree controller
+d | Git |  | 6 items |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | fixed blame when the file has been renamed (in which case the blame command returns the file name in the output)

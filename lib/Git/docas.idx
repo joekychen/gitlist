@@ -1,0 +1,6 @@
+d | Commit |  | 2 items |  | Klaus Silveira | contact@klaussilveira.com | 1337315913 |  | Initial commit
+f | ScopeAware.php | s | 444B | 23 | Klaus Silveira | contact@klaussilveira.com | 1337315913 |  | Initial commit
+d | Model |  | 5 items |  | Klaus Silveira | contact@klaussilveira.com | 1339047150 |  | Better filename handling in commit logs, fixes #35
+f | Client.php | s | 4.9K | 138 | Klaus Silveira | contact@klaussilveira.com | 1339043662 |  | Implementing hidden repository feature, fixes #30
+f | GitServiceProvider.php | s | 549B | 22 | Klaus Silveira | contact@klaussilveira.com | 1341414466 |  | Dropping PHAR, using Composer for dependency management
+f | Repository.php | s | 13K | 456 | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | fixed blame when the file has been renamed (in which case the blame command returns the file name in the output)

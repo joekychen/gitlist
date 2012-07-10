@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html><head><title>joekychen/gitlist » tests › ClientTest.php
+
+</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="generator" content="Docco">
+<link rel="stylesheet" media="all" href="../stylesheets/docco.min.css" />
+
+
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead><tr><th class="docs"><a id="home" href="../index.html"></a><h1>ClientTest.php</h1></th><th class="code"></th></tr></thead>
+<tbody>
+
+
+<tr id="section-1"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div></td><td class="code"><div class="highlight"><pre><span class="cp">&lt;?php</span>
+
+<span class="k">require</span> <span class="s1">&#39;vendor/autoload.php&#39;</span><span class="p">;</span>
+
+<span class="k">use</span> <span class="nx">Git\Client</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">Git\Repository</span><span class="p">;</span>
+
+<span class="k">function</span> <span class="nf">recursiveDelete</span><span class="p">(</span><span class="nv">$dir</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="nv">$files</span> <span class="o">=</span> <span class="nb">scandir</span><span class="p">(</span><span class="nv">$dir</span><span class="p">);</span>
+
+    <span class="k">foreach</span> <span class="p">(</span><span class="nv">$files</span> <span class="k">as</span> <span class="nv">$file</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nv">$file</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span> <span class="o">||</span> <span class="nv">$file</span> <span class="o">==</span> <span class="s1">&#39;..&#39;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">continue</span><span class="p">;</span>
+        <span class="p">}</span>
+        
+        <span class="nv">$path</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">$dir</span><span class="s2">/</span><span class="si">$file</span><span class="s2">&quot;</span><span class="p">;</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="nb">is_dir</span><span class="p">(</span><span class="nv">$path</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nx">recursiveDelete</span><span class="p">(</span><span class="nv">$path</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nb">unlink</span><span class="p">(</span><span class="nv">$path</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="nb">rmdir</span><span class="p">(</span><span class="nv">$dir</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">ClientTest</span> <span class="k">extends</span> <span class="nx">PHPUnit_Framework_TestCase</span>
+<span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$client</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$repoPath</span> <span class="o">=</span> <span class="s1">&#39;/tmp/gitlist/testrepo&#39;</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="k">static</span> <span class="k">function</span> <span class="nf">setUpBeforeClass</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nb">mkdir</span><span class="p">(</span><span class="s1">&#39;/tmp/gitlist&#39;</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">setUp</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">is_writable</span><span class="p">(</span><span class="s1">&#39;/tmp/gitlist&#39;</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">markTestSkipped</span><span class="p">(</span><span class="s1">&#39;There are no write permissions in order to create test repositories.&#39;</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Silex\Application</span><span class="p">();</span>
+        <span class="nv">$app</span><span class="p">[</span><span class="s1">&#39;git.client&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;/usr/bin/git&#39;</span><span class="p">;</span>
+        <span class="nv">$app</span><span class="p">[</span><span class="s1">&#39;hidden&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Client</span><span class="p">(</span><span class="nv">$app</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * @expectedException RuntimeException</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsNotFindingRepositories</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepositories</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * @expectedException RuntimeException</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsNotAbleToGetUnexistingRepository</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+    <span class="p">}</span>
+    
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsCreatingRepository</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">createRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s2">&quot;/nothing to commit/&quot;</span><span class="p">,</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$repository</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * @expectedException RuntimeException</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsNotAbleToCreateRepositoryDueToExistingOne</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">createRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsListingRepositories</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">createRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/../anothertestrepo&#39;</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">createRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/../bigbadrepo&#39;</span><span class="p">);</span>
+        <span class="nv">$repositories</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepositories</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/../&#39;</span><span class="p">);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$repositories</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="s1">&#39;anothertestrepo&#39;</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$repositories</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="s1">&#39;bigbadrepo&#39;</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$repositories</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="s1">&#39;testrepo&#39;</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsConfiguratingRepository</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+        <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">setConfig</span><span class="p">(</span><span class="s1">&#39;user.name&#39;</span><span class="p">,</span> <span class="s1">&#39;Luke Skywalker&#39;</span><span class="p">);</span>
+        <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">setConfig</span><span class="p">(</span><span class="s1">&#39;user.email&#39;</span><span class="p">,</span> <span class="s1">&#39;luke@republic.com&#39;</span><span class="p">);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getConfig</span><span class="p">(</span><span class="s1">&#39;user.name&#39;</span><span class="p">),</span> <span class="s1">&#39;Luke Skywalker&#39;</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getConfig</span><span class="p">(</span><span class="s1">&#39;user.email&#39;</span><span class="p">),</span> <span class="s1">&#39;luke@republic.com&#39;</span><span class="p">);</span>
+    <span class="p">}</span>
+    
+    <span class="sd">/**</span>
+<span class="sd">     * @depends testIsCreatingRepository</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsAdding</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/test_file.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;Your mother is so ugly, glCullFace always returns TRUE.&#39;</span><span class="p">);</span>
+        <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">add</span><span class="p">(</span><span class="s1">&#39;test_file.txt&#39;</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s2">&quot;/new file:   test_file.txt/&quot;</span><span class="p">,</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$repository</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * @depends testIsAdding</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsAddingDot</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+
+        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/test_file1.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;Your mother is so ugly, glCullFace always returns TRUE.&#39;</span><span class="p">);</span>
+        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/test_file2.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;Your mother is so ugly, glCullFace always returns TRUE.&#39;</span><span class="p">);</span>
+        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/test_file3.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;Your mother is so ugly, glCullFace always returns TRUE.&#39;</span><span class="p">);</span>
+
+        <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">add</span><span class="p">();</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s2">&quot;/new file:   test_file1.txt/&quot;</span><span class="p">,</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$repository</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">));</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s2">&quot;/new file:   test_file2.txt/&quot;</span><span class="p">,</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$repository</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">));</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s2">&quot;/new file:   test_file3.txt/&quot;</span><span class="p">,</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$repository</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * @depends testIsAddingDot</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsAddingAll</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+
+        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/test_file4.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;Your mother is so ugly, glCullFace always returns TRUE.&#39;</span><span class="p">);</span>
+        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/test_file5.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;Your mother is so ugly, glCullFace always returns TRUE.&#39;</span><span class="p">);</span>
+        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/test_file6.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;Your mother is so ugly, glCullFace always returns TRUE.&#39;</span><span class="p">);</span>
+
+        <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">addAll</span><span class="p">();</span>
+        
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s2">&quot;/new file:   test_file4.txt/&quot;</span><span class="p">,</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$repository</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">));</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s2">&quot;/new file:   test_file5.txt/&quot;</span><span class="p">,</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$repository</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">));</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s2">&quot;/new file:   test_file6.txt/&quot;</span><span class="p">,</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$repository</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * @depends testIsAddingAll</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsAddingArrayOfFiles</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+
+        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/test_file7.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;Your mother is so ugly, glCullFace always returns TRUE.&#39;</span><span class="p">);</span>
+        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/test_file8.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;Your mother is so ugly, glCullFace always returns TRUE.&#39;</span><span class="p">);</span>
+        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/test_file9.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;Your mother is so ugly, glCullFace always returns TRUE.&#39;</span><span class="p">);</span>
+
+        <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">add</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="s1">&#39;test_file7.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;test_file8.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;test_file9.txt&#39;</span><span class="p">));</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s2">&quot;/new file:   test_file7.txt/&quot;</span><span class="p">,</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$repository</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">));</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s2">&quot;/new file:   test_file8.txt/&quot;</span><span class="p">,</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$repository</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">));</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s2">&quot;/new file:   test_file9.txt/&quot;</span><span class="p">,</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$repository</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">));</span>
+    <span class="p">}</span>
+    
+    <span class="sd">/**</span>
+<span class="sd">     * @depends testIsAddingArrayOfFiles</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsCommiting</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+        <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">commit</span><span class="p">(</span><span class="s2">&quot;The truth unveiled&quot;</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s2">&quot;/The truth unveiled/&quot;</span><span class="p">,</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$repository</span><span class="p">,</span> <span class="s1">&#39;log&#39;</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsCreatingBranches</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+        <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">createBranch</span><span class="p">(</span><span class="s1">&#39;issue12&#39;</span><span class="p">);</span>
+        <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">createBranch</span><span class="p">(</span><span class="s1">&#39;issue42&#39;</span><span class="p">);</span>
+        <span class="nv">$branches</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getBranches</span><span class="p">();</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertContains</span><span class="p">(</span><span class="s1">&#39;issue12&#39;</span><span class="p">,</span> <span class="nv">$branches</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertContains</span><span class="p">(</span><span class="s1">&#39;issue42&#39;</span><span class="p">,</span> <span class="nv">$branches</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertContains</span><span class="p">(</span><span class="s1">&#39;master&#39;</span><span class="p">,</span> <span class="nv">$branches</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsGettingCurrentBranch</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+        <span class="nv">$branch</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getCurrentBranch</span><span class="p">();</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertTrue</span><span class="p">(</span><span class="nv">$branch</span> <span class="o">===</span> <span class="s1">&#39;master&#39;</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * @depends testIsCommiting</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsGettingCommits</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+        <span class="nv">$commits</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getCommits</span><span class="p">();</span>
+        
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$commits</span> <span class="k">as</span> <span class="nv">$commit</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertInstanceOf</span><span class="p">(</span><span class="s1">&#39;Git\Commit\Commit&#39;</span><span class="p">,</span> <span class="nv">$commit</span><span class="p">);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertTrue</span><span class="p">(</span><span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">()</span> <span class="o">===</span> <span class="s1">&#39;The truth unveiled&#39;</span><span class="p">);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertInstanceOf</span><span class="p">(</span><span class="s1">&#39;Git\Commit\Author&#39;</span><span class="p">,</span> <span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getAuthor</span><span class="p">());</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getAuthor</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">getName</span><span class="p">(),</span> <span class="s1">&#39;Luke Skywalker&#39;</span><span class="p">);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getAuthor</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">getEmail</span><span class="p">(),</span> <span class="s1">&#39;luke@republic.com&#39;</span><span class="p">);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getCommiter</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">getName</span><span class="p">(),</span> <span class="s1">&#39;Luke Skywalker&#39;</span><span class="p">);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getCommiter</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">getEmail</span><span class="p">(),</span> <span class="s1">&#39;luke@republic.com&#39;</span><span class="p">);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getParentHash</span><span class="p">(),</span> <span class="s1">&#39;&#39;</span><span class="p">);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertInstanceOf</span><span class="p">(</span><span class="s1">&#39;DateTime&#39;</span><span class="p">,</span> <span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getDate</span><span class="p">());</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertInstanceOf</span><span class="p">(</span><span class="s1">&#39;DateTime&#39;</span><span class="p">,</span> <span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getCommiterDate</span><span class="p">());</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s1">&#39;/[a-f0-9]+/&#39;</span><span class="p">,</span> <span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getHash</span><span class="p">());</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s1">&#39;/[a-f0-9]+/&#39;</span><span class="p">,</span> <span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getShortHash</span><span class="p">());</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s1">&#39;/[a-f0-9]+/&#39;</span><span class="p">,</span> <span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getTreeHash</span><span class="p">());</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * @depends testIsGettingCommits</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsGettingCommitsFromSpecificFile</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+        <span class="nv">$commits</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getCommits</span><span class="p">(</span><span class="s1">&#39;test_file4.txt&#39;</span><span class="p">);</span>
+        
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$commits</span> <span class="k">as</span> <span class="nv">$commit</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertInstanceOf</span><span class="p">(</span><span class="s1">&#39;Git\Commit\Commit&#39;</span><span class="p">,</span> <span class="nv">$commit</span><span class="p">);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertTrue</span><span class="p">(</span><span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">()</span> <span class="o">===</span> <span class="s1">&#39;The truth unveiled&#39;</span><span class="p">);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertInstanceOf</span><span class="p">(</span><span class="s1">&#39;Git\Commit\Author&#39;</span><span class="p">,</span> <span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getAuthor</span><span class="p">());</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getAuthor</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">getName</span><span class="p">(),</span> <span class="s1">&#39;Luke Skywalker&#39;</span><span class="p">);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">getAuthor</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">getEmail</span><span class="p">(),</span> <span class="s1">&#39;luke@republic.com&#39;</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsGettingTree</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+        <span class="nv">$files</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getTree</span><span class="p">(</span><span class="s1">&#39;master&#39;</span><span class="p">);</span>
+        
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$files</span> <span class="k">as</span> <span class="nv">$file</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertInstanceOf</span><span class="p">(</span><span class="s1">&#39;Git\Model\Blob&#39;</span><span class="p">,</span> <span class="nv">$file</span><span class="p">);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s1">&#39;/test_file[0-9]*.txt/&#39;</span><span class="p">,</span> <span class="nv">$file</span><span class="o">-&gt;</span><span class="na">getName</span><span class="p">());</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$file</span><span class="o">-&gt;</span><span class="na">getSize</span><span class="p">(),</span> <span class="s1">&#39;55&#39;</span><span class="p">);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$file</span><span class="o">-&gt;</span><span class="na">getMode</span><span class="p">(),</span> <span class="s1">&#39;100644&#39;</span><span class="p">);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s1">&#39;/[a-f0-9]+/&#39;</span><span class="p">,</span> <span class="nv">$file</span><span class="o">-&gt;</span><span class="na">getHash</span><span class="p">());</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsGettingTreeOutput</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+        <span class="nv">$files</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getTree</span><span class="p">(</span><span class="s1">&#39;master&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">output</span><span class="p">();</span>
+        
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$files</span> <span class="k">as</span> <span class="nv">$file</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;blob&#39;</span><span class="p">,</span> <span class="nv">$file</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s1">&#39;/test_file[0-9]*.txt/&#39;</span><span class="p">,</span> <span class="nv">$file</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$file</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">],</span> <span class="s1">&#39;55&#39;</span><span class="p">);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="nv">$file</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">],</span> <span class="s1">&#39;100644&#39;</span><span class="p">);</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertRegExp</span><span class="p">(</span><span class="s1">&#39;/[a-f0-9]+/&#39;</span><span class="p">,</span> <span class="nv">$file</span><span class="p">[</span><span class="s1">&#39;hash&#39;</span><span class="p">]);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsGettingTreesWithinTree</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span></pre></div></td></tr>
+
+
+<tr id="section-2"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-2">&#182;</a></div><p>Creating folders</p></td><td class="code"><div class="highlight"><pre>        <span class="nb">mkdir</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/MyFolder&#39;</span><span class="p">);</span>
+        <span class="nb">mkdir</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/MyTest&#39;</span><span class="p">);</span>
+        <span class="nb">mkdir</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/MyFolder/Tests&#39;</span><span class="p">);</span></pre></div></td></tr>
+
+
+<tr id="section-3"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-3">&#182;</a></div><p>Populating created folders</p></td><td class="code"><div class="highlight"><pre>        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/MyFolder/crazy.php&#39;</span><span class="p">,</span> <span class="s1">&#39;Lorem ipsum dolor sit amet&#39;</span><span class="p">);</span>
+        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/MyFolder/skywalker.php&#39;</span><span class="p">,</span> <span class="s1">&#39;Lorem ipsum dolor sit amet&#39;</span><span class="p">);</span>
+        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/MyTest/fortytwo.php&#39;</span><span class="p">,</span> <span class="s1">&#39;Lorem ipsum dolor sit amet&#39;</span><span class="p">);</span>
+        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/MyFolder/Tests/web.php&#39;</span><span class="p">,</span> <span class="s1">&#39;Lorem ipsum dolor sit amet&#39;</span><span class="p">);</span>
+        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/MyFolder/Tests/cli.php&#39;</span><span class="p">,</span> <span class="s1">&#39;Lorem ipsum dolor sit amet&#39;</span><span class="p">);</span></pre></div></td></tr>
+
+
+<tr id="section-4"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-4">&#182;</a></div><p>Adding and commiting</p></td><td class="code"><div class="highlight"><pre>        <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">addAll</span><span class="p">();</span>
+        <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">commit</span><span class="p">(</span><span class="s2">&quot;Creating folders for testIsGettingTreesWithinTrees&quot;</span><span class="p">);</span></pre></div></td></tr>
+
+
+<tr id="section-5"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-5">&#182;</a></div><p>Checking tree</p></td><td class="code"><div class="highlight"><pre>        <span class="nv">$files</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getTree</span><span class="p">(</span><span class="s1">&#39;master&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">output</span><span class="p">();</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;folder&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;MyFolder&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;040000&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;4143e982237f3bdf56b5350f862c334054aad69e&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;hash&#39;</span><span class="p">]);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;folder&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;MyTest&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;040000&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;632240595eabd59e4217d196d6c12efb81f9c011&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;hash&#39;</span><span class="p">]);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;blob&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;test_file.txt&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;55&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;100644&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;a773bfc0fda6f878e3d17d78c667d18297c8831f&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;hash&#39;</span><span class="p">]);</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsGettingBlobsWithinTrees</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+        <span class="nv">$files</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getTree</span><span class="p">(</span><span class="s1">&#39;master:MyFolder/&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">output</span><span class="p">();</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;folder&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;Tests&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;040000&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;8542f67d011ff2ea5ec49a729ba81a52935676d1&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;hash&#39;</span><span class="p">]);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;blob&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;crazy.php&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;26&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;100644&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;d781006b2d05cc31751954a0fb920c990e825aad&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;hash&#39;</span><span class="p">]);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;blob&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;skywalker.php&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;26&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;100644&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;d781006b2d05cc31751954a0fb920c990e825aad&#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;hash&#39;</span><span class="p">]);</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsGettingBlobOutput</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+        <span class="nv">$blob</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getBlob</span><span class="p">(</span><span class="s1">&#39;master:MyFolder/crazy.php&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">output</span><span class="p">();</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;Lorem ipsum dolor sit amet&#39;</span><span class="p">,</span> <span class="nv">$blob</span><span class="p">);</span>
+
+        <span class="nv">$blob</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getBlob</span><span class="p">(</span><span class="s1">&#39;master:test_file4.txt&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">output</span><span class="p">();</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;Your mother is so ugly, glCullFace always returns TRUE.&#39;</span><span class="p">,</span> <span class="nv">$blob</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsGettingStatistics</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+        <span class="nv">$stats</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getStatistics</span><span class="p">(</span><span class="s1">&#39;master&#39;</span><span class="p">);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;10&#39;</span><span class="p">,</span> <span class="nv">$stats</span><span class="p">[</span><span class="s1">&#39;extensions&#39;</span><span class="p">][</span><span class="s1">&#39;.txt&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;5&#39;</span><span class="p">,</span> <span class="nv">$stats</span><span class="p">[</span><span class="s1">&#39;extensions&#39;</span><span class="p">][</span><span class="s1">&#39;.php&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;680&#39;</span><span class="p">,</span> <span class="nv">$stats</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;15&#39;</span><span class="p">,</span> <span class="nv">$stats</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]);</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">testIsGettingAuthorStatistics</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">getRepository</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span><span class="p">);</span>
+        <span class="nv">$stats</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getAuthorStatistics</span><span class="p">();</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;Luke Skywalker&#39;</span><span class="p">,</span> <span class="nv">$stats</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;luke@republic.com&#39;</span><span class="p">,</span> <span class="nv">$stats</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;email&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="nv">$stats</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;commits&#39;</span><span class="p">]);</span>
+
+        <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">setConfig</span><span class="p">(</span><span class="s1">&#39;user.name&#39;</span><span class="p">,</span> <span class="s1">&#39;Princess Leia&#39;</span><span class="p">);</span>
+        <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">setConfig</span><span class="p">(</span><span class="s1">&#39;user.email&#39;</span><span class="p">,</span> <span class="s1">&#39;sexyleia@republic.com&#39;</span><span class="p">);</span>
+        <span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">repoPath</span> <span class="o">.</span> <span class="s1">&#39;/MyFolder/crazy.php&#39;</span><span class="p">,</span> <span class="s1">&#39;Lorem ipsum dolor sit AMET&#39;</span><span class="p">);</span>
+        <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">addAll</span><span class="p">();</span>
+        <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">commit</span><span class="p">(</span><span class="s2">&quot;Fixing AMET case&quot;</span><span class="p">);</span>
+
+        <span class="nv">$stats</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getAuthorStatistics</span><span class="p">();</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;Luke Skywalker&#39;</span><span class="p">,</span> <span class="nv">$stats</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;luke@republic.com&#39;</span><span class="p">,</span> <span class="nv">$stats</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;email&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="nv">$stats</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;commits&#39;</span><span class="p">]);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;Princess Leia&#39;</span><span class="p">,</span> <span class="nv">$stats</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;sexyleia@republic.com&#39;</span><span class="p">,</span> <span class="nv">$stats</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;email&#39;</span><span class="p">]);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="nv">$stats</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;commits&#39;</span><span class="p">]);</span>
+    <span class="p">}</span>
+    
+    <span class="k">public</span> <span class="k">static</span> <span class="k">function</span> <span class="nf">tearDownAfterClass</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nx">recursiveDelete</span><span class="p">(</span><span class="s1">&#39;/tmp/gitlist&#39;</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+</pre></div></td></tr>
+
+</tbody>
+</table>
+</div>
+
+</body>
+<script>docas={repo:"joekychen/gitlist",depth:1}</script>
+<script>document.write('<script src=' + ('__proto__' in {} ? 'http://cdnjs.cloudflare.com/ajax/libs/zepto/1.0rc1/zepto.min.js' : 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')+'><\\/script>')</script>
+<script src="http://baoshan.github.com/moment/min/moment.min.js"></script>
+<script src="../javascript/docco.min.js"></script>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html><head><title>joekychen/gitlist » lib › Git › Client.php
+
+</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="generator" content="Docco">
+<link rel="stylesheet" media="all" href="../../stylesheets/docco.min.css" />
+
+
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead><tr><th class="docs"><a id="home" href="../../index.html"></a><h1>Client.php</h1></th><th class="code"></th></tr></thead>
+<tbody>
+
+
+<tr id="section-1"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div></td><td class="code"><div class="highlight"><pre><span class="cp">&lt;?php</span>
+
+<span class="k">namespace</span> <span class="nx">Git</span><span class="p">;</span>
+
+<span class="k">use</span> <span class="nx">Silex\Application</span><span class="p">;</span>
+
+<span class="k">class</span> <span class="nc">Client</span>
+<span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$app</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$path</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">__construct</span><span class="p">(</span><span class="nx">Application</span> <span class="nv">$app</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">app</span> <span class="o">=</span> <span class="nv">$app</span><span class="p">;</span>
+        <span class="nv">$path</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">app</span><span class="p">[</span><span class="s1">&#39;git.client&#39;</span><span class="p">]</span> <span class="o">?</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">app</span><span class="p">[</span><span class="s1">&#39;git.client&#39;</span><span class="p">]</span> <span class="o">:</span> <span class="s1">&#39;/usr/bin/git&#39;</span><span class="p">;</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">setPath</span><span class="p">(</span><span class="nv">$path</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Creates a new repository on the specified path</span>
+<span class="sd">     *</span>
+<span class="sd">     * @param string $path Path where the new repository will be created</span>
+<span class="sd">     * @return Repository Instance of Repository</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">createRepository</span><span class="p">(</span><span class="nv">$path</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">file_exists</span><span class="p">(</span><span class="nv">$path</span> <span class="o">.</span> <span class="s1">&#39;/.git/HEAD&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nb">file_exists</span><span class="p">(</span><span class="nv">$path</span> <span class="o">.</span> <span class="s1">&#39;/HEAD&#39;</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nx">\RuntimeException</span><span class="p">(</span><span class="s1">&#39;A GIT repository already exists at &#39;</span> <span class="o">.</span> <span class="nv">$path</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nv">$repository</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Repository</span><span class="p">(</span><span class="nv">$path</span><span class="p">,</span> <span class="nv">$this</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">create</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Opens a repository at the specified path</span>
+<span class="sd">     *</span>
+<span class="sd">     * @param string $path Path where the repository is located</span>
+<span class="sd">     * @return Repository Instance of Repository</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getRepository</span><span class="p">(</span><span class="nv">$path</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">file_exists</span><span class="p">(</span><span class="nv">$path</span><span class="p">)</span> <span class="o">||</span> <span class="o">!</span><span class="nb">file_exists</span><span class="p">(</span><span class="nv">$path</span> <span class="o">.</span> <span class="s1">&#39;/.git/HEAD&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nb">file_exists</span><span class="p">(</span><span class="nv">$path</span> <span class="o">.</span> <span class="s1">&#39;/HEAD&#39;</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nx">\RuntimeException</span><span class="p">(</span><span class="s1">&#39;There is no GIT repository at &#39;</span> <span class="o">.</span> <span class="nv">$path</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">in_array</span><span class="p">(</span><span class="nv">$path</span><span class="p">,</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">app</span><span class="p">[</span><span class="s1">&#39;hidden&#39;</span><span class="p">]))</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nx">\RuntimeException</span><span class="p">(</span><span class="s1">&#39;You don\&#39;t have access to this repository&#39;</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="k">new</span> <span class="nx">Repository</span><span class="p">(</span><span class="nv">$path</span><span class="p">,</span> <span class="nv">$this</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Searches for valid repositories on the specified path</span>
+<span class="sd">     *</span>
+<span class="sd">     * @param string $path Path where repositories will be searched</span>
+<span class="sd">     * @return array Found repositories, containing their name, path and description</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getRepositories</span><span class="p">(</span><span class="nv">$path</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$repositories</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">recurseDirectory</span><span class="p">(</span><span class="nv">$path</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$repositories</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nx">\RuntimeException</span><span class="p">(</span><span class="s1">&#39;There are no GIT repositories in &#39;</span> <span class="o">.</span> <span class="nv">$path</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nb">sort</span><span class="p">(</span><span class="nv">$repositories</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="nv">$repositories</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">private</span> <span class="k">function</span> <span class="nf">recurseDirectory</span><span class="p">(</span><span class="nv">$path</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$dir</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\DirectoryIterator</span><span class="p">(</span><span class="nv">$path</span><span class="p">);</span>
+
+        <span class="nv">$repositories</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$dir</span> <span class="k">as</span> <span class="nv">$file</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nv">$file</span><span class="o">-&gt;</span><span class="na">isDot</span><span class="p">())</span> <span class="p">{</span>
+                <span class="k">continue</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">((</span><span class="nv">$pos</span> <span class="o">=</span> <span class="nb">strrpos</span><span class="p">(</span><span class="nv">$file</span><span class="o">-&gt;</span><span class="na">getFilename</span><span class="p">(),</span> <span class="s1">&#39;.&#39;</span><span class="p">))</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">continue</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="nv">$isBare</span> <span class="o">=</span> <span class="nb">file_exists</span><span class="p">(</span><span class="nv">$file</span><span class="o">-&gt;</span><span class="na">getPathname</span><span class="p">()</span> <span class="o">.</span> <span class="s1">&#39;/HEAD&#39;</span><span class="p">);</span>
+            <span class="nv">$isRepository</span> <span class="o">=</span> <span class="nb">file_exists</span><span class="p">(</span><span class="nv">$file</span><span class="o">-&gt;</span><span class="na">getPathname</span><span class="p">()</span> <span class="o">.</span> <span class="s1">&#39;/.git/HEAD&#39;</span><span class="p">);</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nv">$file</span><span class="o">-&gt;</span><span class="na">isDir</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="nv">$isRepository</span> <span class="o">||</span> <span class="nv">$isBare</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">in_array</span><span class="p">(</span><span class="nv">$file</span><span class="o">-&gt;</span><span class="na">getPathname</span><span class="p">(),</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">app</span><span class="p">[</span><span class="s1">&#39;hidden&#39;</span><span class="p">]))</span> <span class="p">{</span>
+                    <span class="k">continue</span><span class="p">;</span>
+                <span class="p">}</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nv">$isBare</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nv">$description</span> <span class="o">=</span> <span class="nv">$file</span><span class="o">-&gt;</span><span class="na">getPathname</span><span class="p">()</span> <span class="o">.</span> <span class="s1">&#39;/description&#39;</span><span class="p">;</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nv">$description</span> <span class="o">=</span> <span class="nv">$file</span><span class="o">-&gt;</span><span class="na">getPathname</span><span class="p">()</span> <span class="o">.</span> <span class="s1">&#39;/.git/description&#39;</span><span class="p">;</span>
+                <span class="p">}</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nb">file_exists</span><span class="p">(</span><span class="nv">$description</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nv">$description</span> <span class="o">=</span> <span class="nb">file_get_contents</span><span class="p">(</span><span class="nv">$description</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nv">$description</span> <span class="o">=</span> <span class="s1">&#39;There is no repository description file. Please, create one to remove this message.&#39;</span><span class="p">;</span>
+                <span class="p">}</span>
+
+                <span class="nv">$repositories</span><span class="p">[]</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;name&#39;</span> <span class="o">=&gt;</span> <span class="nv">$file</span><span class="o">-&gt;</span><span class="na">getFilename</span><span class="p">(),</span> <span class="s1">&#39;path&#39;</span> <span class="o">=&gt;</span> <span class="nv">$file</span><span class="o">-&gt;</span><span class="na">getPathname</span><span class="p">(),</span> <span class="s1">&#39;description&#39;</span> <span class="o">=&gt;</span> <span class="nv">$description</span><span class="p">);</span>
+                <span class="k">continue</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="nv">$repositories</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Execute a git command on the repository being manipulated</span>
+<span class="sd">     *</span>
+<span class="sd">     * This method will start a new process on the current machine and</span>
+<span class="sd">     * run git commands. Once the command has been run, the method will</span>
+<span class="sd">     * return the command line output.</span>
+<span class="sd">     *</span>
+<span class="sd">     * @param Repository $repository Repository where the command will be run</span>
+<span class="sd">     * @param string $command Git command to be run</span>
+<span class="sd">     * @return string Returns the command output</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">run</span><span class="p">(</span><span class="nx">Repository</span> <span class="nv">$repository</span><span class="p">,</span> <span class="nv">$command</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$descriptors</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="mi">0</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span><span class="s2">&quot;pipe&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">),</span> <span class="mi">1</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span><span class="s2">&quot;pipe&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">),</span> <span class="mi">2</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span><span class="s2">&quot;pipe&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">));</span>
+        <span class="nv">$process</span> <span class="o">=</span> <span class="nb">proc_open</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getPath</span><span class="p">()</span> <span class="o">.</span> <span class="s1">&#39; &#39;</span> <span class="o">.</span> <span class="nv">$command</span><span class="p">,</span> <span class="nv">$descriptors</span><span class="p">,</span> <span class="nv">$pipes</span><span class="p">,</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getPath</span><span class="p">());</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">is_resource</span><span class="p">(</span><span class="nv">$process</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nx">\RuntimeException</span><span class="p">(</span><span class="s1">&#39;Unable to execute command: &#39;</span> <span class="o">.</span> <span class="nv">$command</span><span class="p">);</span>
+        <span class="p">}</span>
+        
+        <span class="nv">$stderr</span> <span class="o">=</span> <span class="nb">stream_get_contents</span><span class="p">(</span><span class="nv">$pipes</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+        <span class="nb">fclose</span><span class="p">(</span><span class="nv">$pipes</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$stderr</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nx">\RuntimeException</span><span class="p">(</span><span class="nv">$stderr</span><span class="p">);</span>
+        <span class="p">}</span>
+        
+        <span class="nv">$stdout</span> <span class="o">=</span> <span class="nb">stream_get_contents</span><span class="p">(</span><span class="nv">$pipes</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+        <span class="nb">fclose</span><span class="p">(</span><span class="nv">$pipes</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+
+        <span class="nb">proc_close</span><span class="p">(</span><span class="nv">$process</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nv">$stdout</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Get the current Git binary path</span>
+<span class="sd">     *</span>
+<span class="sd">     * @return string Path where the Git binary is located</span>
+<span class="sd">     */</span>
+    <span class="k">protected</span> <span class="k">function</span> <span class="nf">getPath</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">path</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Set the current Git binary path</span>
+<span class="sd">     *</span>
+<span class="sd">     * @param string $path Path where the Git binary is located</span>
+<span class="sd">     */</span>
+    <span class="k">protected</span> <span class="k">function</span> <span class="nf">setPath</span><span class="p">(</span><span class="nv">$path</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">path</span> <span class="o">=</span> <span class="nv">$path</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+</pre></div></td></tr>
+
+</tbody>
+</table>
+</div>
+
+</body>
+<script>docas={repo:"joekychen/gitlist",depth:2}</script>
+<script>document.write('<script src=' + ('__proto__' in {} ? 'http://cdnjs.cloudflare.com/ajax/libs/zepto/1.0rc1/zepto.min.js' : 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')+'><\\/script>')</script>
+<script src="http://baoshan.github.com/moment/min/moment.min.js"></script>
+<script src="../../javascript/docco.min.js"></script>
+</html>

@@ -1,125 +1,190 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>GitList - An elegant and modern git repository viewer</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="css/bootstrap.css" rel="stylesheet">
-        <link href="css/style.css" rel="stylesheet">
-        <!--[if lt IE 9]>
-            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-        <![endif]-->
-    </head>
-    <body>
-        <a href="https://github.com/klaussilveira/gitlist"><img class="ribbon" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
-        <div class="navbar navbar-fixed-top">
-            <div class="navbar-inner">
-                <div class="container">
-                    <a class="brand" href="http://www.gitlist.org/">
-                        GitList
-                    </a>
-                    <div class="nav-collapse fr">
-                        <ul class="nav">
-                            <li class="active"><a href="http://www.gitlist.org/">Home</a></li>
-                            <li><a href="http://ci.gitlist.org:8080">Continuous Integration</a></li>
-                            <li><a href="https://github.com/klaussilveira/gitlist/issues?state=open">Issues</a></li>
-                            <li><a href="https://github.com/klaussilveira/gitlist/wiki">Wiki</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+<html><head>
+<title>joekychen/gitlist - An elegant and modern git repository viewer</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" media="all" href="stylesheets/index.min.css" />
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td>
+<div style="position:absolute;top:0px;left:0px;width:525px">
+<a href="https://github.com/joekychen/gitlist"><img src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+</div>
+<h1>gitlist</h1>
+<p>An elegant and modern git repository viewer</p>
+<!--readme-->
+</td>
+<td></td>
+</tr>
+<tr>
+<td>
+<div class="markdown_browser"><h1>GitList: an elegant and modern git repository viewer</h1>
 
-        <div class="hero-unit">
-            <div class="container">
-                <h1 class="ac">GitList</h1><br />
-                <p class="ac">
-                    an elegant and modern git repository viewer
-                </p>
+<p><a href="http://travis-ci.org/klaussilveira/gitlist"><img src="https://secure.travis-ci.org/klaussilveira/gitlist.png" alt="Build Status" title="" /></a></p>
 
-                <div id="gitlist_roller">
-                    <div id="gitlist_preview" class="carousel slide" rel="carousel">
-                        <div class="carousel-inner">
-                            <div class="active item">
-                                <span class="feature" style="width:90px;height:18px;" data-top="43" data-left="8" rel="popover" data-placement="bottom" data-title="Branch switching" data-content="GitList allows you to easily switch between branches"></span>
-                                <span class="feature" style="width:130px;height:28px;" data-top="43" data-left="110" rel="popover" data-placement="bottom" data-title="Repository tools" data-content="Browse files, view commits and check stats of your repositories"></span>
-                                <span class="feature" style="width:20px;height:20px;" data-top="82" data-left="640" rel="popover" data-placement="bottom" data-title="Repository feed" data-content="Stay tuned to repository commits with RSS feeds"></span>
-                                <img src="img/roller/3.jpg" />
-                            </div>
-                            <div class="item">
-                                <span class="feature" style="width:140px;height:24px;" data-top="120" data-left="520" rel="popover" data-placement="bottom" data-title="File tools" data-content="Easily check the commit history of a file, blame it or see the raw version"></span>
-                                <img src="img/roller/1.jpg" />
-                            </div>
-                            <div class="item">
-                                <img src="img/roller/2.jpg" />
-                            </div>
-                        </div>
-                        <a class="carousel-control left" href="#gitlist_preview" data-slide="prev">&lsaquo;</a>
-                        <a class="carousel-control right" href="#gitlist_preview" data-slide="next">&rsaquo;</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+<p>GitList is an elegant and modern web interface for interacting with multiple git repositories. It allows you to browse repositories using your favorite browser, viewing files under different revisions, commit history, diffs. It also generates RSS feeds for each repository, allowing you to stay up-to-date with the latest changes anytime, anywhere. GitList was written in PHP, on top of the <a href="http://silex.sensiolabs.org/">Silex</a> microframework and powered by the Twig template engine. This means that GitList is easy to install and easy to customize. Also, the GitList gorgeous interface was made possible due to <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>. </p>
 
-        <div class="container">
+<h2>Features</h2>
 
-            <div class="row">
-                <div class="span8">
-                    <h1 class="lead">
-                        GitList allows you to browse repositories using your favorite browser, viewing files under different revisions, commit history and diffs. GitList is free and open source software, written in PHP, on top of <a href="http://silex.sensiolabs.org/">Silex</a> and the <a href="http://twig.sensiolabs.org/">Twig</a> template engine.
-                        <div class="addthis_toolbox addthis_default_style ">
-                            <a class="addthis_button_tweet"></a>
-                            <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
-                            <a class="addthis_counter addthis_pill_style"></a>
-                        </div>
-                    </h1>
-                </div>
-                <div class="span4">
-                    <h2 class="ac download">Download</h2>
-                    <p class="ac">
-                        <a class="btn btn-large btn-primary" href="https://s3.amazonaws.com/gitlist/gitlist-0.2.tar.gz"><b>Latest stable (0.2)</b></a>
-                    </p>
-                    <p class="ac">
-                        <a class="btn btn-large btn-inverse" href="https://s3.amazonaws.com/gitlist/master.tar.gz"><b>Development build (master)</b></a>
-                    </p>
-                </div>
-            </div>
+<ul>
+<li>Multiple repository support</li>
+<li>Multiple branch support</li>
+<li>Multiple tag support</li>
+<li>Commit history, blame, diff</li>
+<li>RSS feeds</li>
+<li>Syntax highlighting</li>
+<li>Repository statistics</li>
+</ul>
 
-            <hr />
+<h2>Screenshots</h2>
 
-            <div class="row">
-                <div class="span4">
-                    <h2>Development</h2>
-                    <p >GitList is actively maintained by many developers around the world. You can <a href="https://github.com/klaussilveira/gitlist/">fork the project on GitHub</a> and start contributing yourself. The project is <a href="http://ci.gitlist.org:8080/">continuously integrated</a>, so we can improve code quality and build effortlessly.</p>
-                </div>
-                <div class="span4">
-                    <h2>Mailing list</h2>
-                    <p>The <a href="http://groups.google.com/group/gitlist">GitList mailing list</a> is where you can find support and where we discuss the development of the project.</p>
-                </div>
-                <div class="span4">
-                    <h2>Contributors</h2>
-                    <p>This is a list of developers who have contributed to GitList. Thank you! :)</p>
-                    <div id="contributors"></div>
-                </div>
-            </div>
-            <hr />
-            <br />
-        </div>
+<p><a href="http://cloud.github.com/downloads/klaussilveira/gitlist/1.jpg"><img src="http://dl.dropbox.com/u/62064441/th1.jpg" alt="GitList Screenshot" title="" /></a>
+<a href="http://cloud.github.com/downloads/klaussilveira/gitlist/2.jpg"><img src="http://dl.dropbox.com/u/62064441/th2.jpg" alt="GitList Screenshot" title="" /></a>
+<a href="http://cloud.github.com/downloads/klaussilveira/gitlist/3.jpg"><img src="http://dl.dropbox.com/u/62064441/th3.jpg" alt="GitList Screenshot" title="" /></a>
+<a href="http://cloud.github.com/downloads/klaussilveira/gitlist/4.jpg"><img src="http://dl.dropbox.com/u/62064441/th4.jpg" alt="GitList Screenshot" title="" /></a>
+<a href="http://cloud.github.com/downloads/klaussilveira/gitlist/5.jpg"><img src="http://dl.dropbox.com/u/62064441/th5.jpg" alt="GitList Screenshot" title="" /></a></p>
 
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-        <script type="text/javascript" src="js/bootstrap.js"></script>
-        <script type="text/javascript" src="js/main.js"></script>
-        <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=ra-4ff4f44714213073"></script>
-        <script type="text/javascript">
-          var _gaq = _gaq || [];
-          _gaq.push(['_setAccount', 'UA-33185077-1']);
-          _gaq.push(['_trackPageview']);
-        
-          (function() {
-            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-          })();
-        </script>
-    </body>
+<p>You can also see a live demo <a href="http://git.gofedora.com">here</a>.</p>
+
+<h2>Authors and contributors</h2>
+
+<ul>
+<li><a href="http://www.klaussilveira.com">Klaus Silveira</a> (Creator, developer)</li>
+</ul>
+
+<h2>License</h2>
+
+<p><a href="http://www.opensource.org/licenses/bsd-license.php">New BSD license</a></p>
+
+<h2>Todo</h2>
+
+<ul>
+<li>improve the current test code coverage</li>
+<li>test the interface</li>
+<li>error handling can be greatly improved during parsing</li>
+<li>submodule support</li>
+<li>multilanguage support</li>
+</ul>
+
+<h2>Requirements</h2>
+
+<p>In order to run GitList on your server, you'll need:</p>
+
+<ul>
+<li>git</li>
+<li>Apache with mod_rewrite enabled or nginx</li>
+<li>PHP 5.3.3</li>
+</ul>
+
+<h2>Installing</h2>
+
+<ul>
+<li>Download GitList from <a href="http://gitlist.org/">gitlist.org</a> and decompress to your <code>/var/www/gitlist</code> folder, or anywhere else you want to place GitList. </li>
+<li>Rename the <code>config.ini-example</code> file to <code>config.ini</code>.</li>
+<li>Open up the <code>config.ini</code> and configure your installation. You'll have to provide where your repositories are located and the base GitList URL (in our case, http://localhost/gitlist).</li>
+<li>Create the cache folder and give the correct permissions:</li>
+</ul>
+
+<p><code>
+cd /var/www/gitlist
+mkdir cache
+chmod 777 cache
+</code></p>
+
+<p>That's it, installation complete! If you're having problems, check this <a href="http://gofedora.com/insanely-awesome-web-interface-git-repos/">tutorial</a> by Kulbir Saini or the <a href="https://github.com/klaussilveira/gitlist/wiki/Troubleshooting">Troubleshooting</a> page.</p>
+
+<h2>Building</h2>
+
+<p>GitList uses <a href="http://getcomposer.org/">Composer</a> to manage dependencies and <a href="http://ant.apache.org/">Ant</a> to build the project. In order to run all the targets in the build script, you will need <a href="http://www.phpunit.de/">PHPUnit</a>, <a href="https://github.com/sebastianbergmann/phpcpd">phpcpd</a>, <a href="https://github.com/sebastianbergmann/phploc">phploc</a>, <a href="http://phpmd.org/">PHPMD</a> and <a href="http://pdepend.org">PHP_Depend</a>.</p>
+
+<p>Once you have all the dependencies set, you can clone the repository and run Ant:</p>
+
+<p><code>
+git clone https://github.com/klaussilveira/gitlist.git
+ant
+</code></p>
+
+<p>If you just want to get the project dependencies, instead of building everything:</p>
+
+<p><code>
+git clone https://github.com/klaussilveira/gitlist.git
+curl -s http://getcomposer.org/installer | php
+php composer.phar install
+</code></p>
+
+<p>If you have Composer in your path, things get easier. But you know the drill.</p>
+
+<h2>Contributing</h2>
+
+<p>If you are a developer, we need your help. GitList is a young project and we have lot's of stuff to do. Some developers are contributing with new features, others with bug fixes. But you can also dedicate yourself to refactoring the current codebase and improving what we already have. This is very important, we want GitList to be a state-of-the-art application, and we need your help for that.</p>
+
+<ul>
+<li>Stay tuned to possible bugs, suboptimal code, duplicated code, overcomplicated expressions and unused code with <a href="http://ci.gitlist.org:8080/job/GitList%20(master)/9/pmdResult/?">PHPMD</a> in our CI server</li>
+<li>Try to fix any <a href="http://ci.gitlist.org:8080/job/GitList%20(master)/violations/">violations</a> reported</li>
+<li>Improve the <a href="http://ci.gitlist.org:8080/job/GitList%20(master)/9/cloverphp-report/">test coverage</a> by creating unit and functional tests</li>
+</ul>
+
+<h2>Further information</h2>
+
+<p>If you want to know more about customizing GitList, check the <a href="https://github.com/klaussilveira/gitlist/wiki/Customizing">Customization</a> page on the wiki. Also, if you're having problems with GitList, check the <a href="https://github.com/klaussilveira/gitlist/wiki/Troubleshooting">Troubleshooting</a> page. Don't forget to report issues and suggest new features! :)</p></div>
+</td>
+<td>
+<!--content-->
+<div class="content">
+<h2 id="language_statistics_heading">Language Statistics</h2>
+<table id="code_stats">
+
+<tr>
+<td>99%</td>
+<td>PHP</td>
+<td><span data-lang="PHP"></span></td>
+<td style="width:400px;"><div><span data-lang="PHP" percent="99%" style="width:0%;"></span><span total="1884"></span></div></td>
+</tr>
+<tr>
+
+<tr>
+<td>1%</td>
+<td>JavaScript</td>
+<td><span data-lang="JavaScript"></span></td>
+<td style="width:400px;"><div><span data-lang="JavaScript" percent="1%" style="width:0%;"></span><span total="22"></span></div></td>
+</tr>
+<tr>
+
+</table>
+<h2 id="recent_commits_heading">Recent Commits</h2>
+<ol id="recent_commits">
+
+
+<li>It seems that Markdown doesn't like () inside URL's. Escaping!, Klaus Silveira, <span relative_date="1341889720000"></span></li>
+
+
+<li>Merge pull request #74 from fabpot/refactoring, Klaus Silveira, <span relative_date="1341715273000"></span></li>
+
+
+<li>fixed blame when the file has been renamed (in which case the blame command returns the file name in the output), Fabien Potencier, <span relative_date="1341643205000"></span></li>
+
+
+<li>removed some / at the end of some URLs to be consistent with other URLs, Fabien Potencier, <span relative_date="1341642349000"></span></li>
+
+
+<li>refactored code for list of commits, Fabien Potencier, <span relative_date="1341642283000"></span></li>
+
+</ol>
+<div id="filebrowser">
+<div id="breadcrumb"><span>gitlist</span></div>
+<div id="filelists"><div depth="0" class="filelist"><table class="repo_nav"> <thead><tr><th></th><th>name</th><th class="size"><span>sloc</span>&nbsp;&nbsp;<span>size</span></th><th>age</th><th class="message"><span>message</span>&nbsp;&nbsp;<span>description</span><div class="history"><a target="_blank" href="https://github.com/joekychen/gitlist/commits/master">history</a></div></th></tr></thead> <tbody>   <tr class="d"> <td class="icon"></td> <td><a forward>controllers</a></td> <td class="size"><span>-</span><span>6 items</span></td> <td relative_date="1341644262000"></td> <td class="message"><div><span>removed some / at the end of some URLs to be consistent with other URLs</span><span class="file_browser_author" email="fabien.potencier@gmail.com"> Fabien Potencier</span></div><div></div></td> </tr>  <tr class="d"> <td class="icon"></td> <td><a forward>lib</a></td> <td class="size"><span>-</span><span>2 items</span></td> <td relative_date="1341644262000"></td> <td class="message"><div><span>fixed blame when the file has been renamed (in which case the blame command returns the file name in the output)</span><span class="file_browser_author" email="fabien.potencier@gmail.com"> Fabien Potencier</span></div><div></div></td> </tr>  <tr class="d"> <td class="icon"></td> <td><a forward>nginx</a></td> <td class="size"><span>-</span><span>1 items</span></td> <td relative_date="1337469240000"></td> <td class="message"><div><span>Fix rule</span><span class="file_browser_author" email="ddrtist@gmail.com"> Tatsh</span></div><div></div></td> </tr>  <tr class="d"> <td class="icon"></td> <td><a forward>tests</a></td> <td class="size"><span>-</span><span>1 items</span></td> <td relative_date="1341414626000"></td> <td class="message"><div><span>Using Composer autoloader for test suite, making Travis support Composer to run test suite properly</span><span class="file_browser_author" email="contact@klaussilveira.com"> Klaus Silveira</span></div><div></div></td> </tr>  <tr class="d"> <td class="icon"></td> <td><a forward>views</a></td> <td class="size"><span>-</span><span>16 items</span></td> <td relative_date="1341644262000"></td> <td class="message"><div><span>moved the page variable to the templates (belongs to the view)</span><span class="file_browser_author" email="fabien.potencier@gmail.com"> Fabien Potencier</span></div><div></div></td> </tr>  <tr class="d"> <td class="icon"></td> <td><a forward>web</a></td> <td class="size"><span>-</span><span>5 items</span></td> <td relative_date="1341584568000"></td> <td class="message"><div><span>Fixing bug in the commit header bar with long commit messages</span><span class="file_browser_author" email="contact@klaussilveira.com"> Klaus Silveira</span></div><div></div></td> </tr>  <tr class="f"> <td class="icon"></td> <td><a href="https://github.com/joekychen/gitlist/blob/master/LICENSE.txt"target='_blank'>LICENSE.txt</a></td> <td class="size"><span>-</span><span>1.4K</span></td> <td relative_date="1337315913000"></td> <td class="message"><div><span>Initial commit</span><span class="file_browser_author" email="contact@klaussilveira.com"> Klaus Silveira</span></div><div></div></td> </tr>  <tr class="f markdown shown"> <td class="icon"></td> <td><a markdown="README.html">README.md</a></td> <td class="size"><span>65 lines</span><span>5.0K</span></td> <td relative_date="1341889720000"></td> <td class="message"><div><span>It seems that Markdown doesn't like () inside URL's. Escaping!</span><span class="file_browser_author" email="contact@klaussilveira.com"> Klaus Silveira</span></div><div>README.md for project gitlist</div></td> </tr>  <tr class="f"> <td class="icon"></td> <td><a href="https://github.com/joekychen/gitlist/blob/master/build.xml"target='_blank'>build.xml</a></td> <td class="size"><span>-</span><span>3.3K</span></td> <td relative_date="1341464944000"></td> <td class="message"><div><span>Adding a target for packaging the application in a single tarball</span><span class="file_browser_author" email="contact@klaussilveira.com"> Klaus Silveira</span></div><div></div></td> </tr>  <tr class="f"> <td class="icon"></td> <td><a href="https://github.com/joekychen/gitlist/blob/master/composer.json"target='_blank'>composer.json</a></td> <td class="size"><span>-</span><span>275B</span></td> <td relative_date="1341644258000"></td> <td class="message"><div><span>fixed URL management</span><span class="file_browser_author" email="fabien.potencier@gmail.com"> Fabien Potencier</span></div><div></div></td> </tr>  <tr class="f"> <td class="icon"></td> <td><a href="https://github.com/joekychen/gitlist/blob/master/composer.lock"target='_blank'>composer.lock</a></td> <td class="size"><span>-</span><span>3.2K</span></td> <td relative_date="1341644258000"></td> <td class="message"><div><span>fixed URL management</span><span class="file_browser_author" email="fabien.potencier@gmail.com"> Fabien Potencier</span></div><div></div></td> </tr>  <tr class="f"> <td class="icon"></td> <td><a href="https://github.com/joekychen/gitlist/blob/master/config.ini-example"target='_blank'>config.ini-example</a></td> <td class="size"><span>-</span><span>388B</span></td> <td relative_date="1341644258000"></td> <td class="message"><div><span>fixed URL management</span><span class="file_browser_author" email="fabien.potencier@gmail.com"> Fabien Potencier</span></div><div></div></td> </tr>  <tr class="f"> <td class="icon"></td> <td><a href="index.html">index.php</a></td> <td class="size"><span>44 lines</span><span>1.7K</span></td> <td relative_date="1341644258000"></td> <td class="message"><div><span>fixed URL management</span><span class="file_browser_author" email="fabien.potencier@gmail.com"> Fabien Potencier</span></div><div></div></td> </tr>  <tr class="f"> <td class="icon"></td> <td><a href="https://github.com/joekychen/gitlist/blob/master/phpunit.xml.dist"target='_blank'>phpunit.xml.dist</a></td> <td class="size"><span>-</span><span>702B</span></td> <td relative_date="1341447587000"></td> <td class="message"><div><span>Adding JUnit and Clover logging to test suite</span><span class="file_browser_author" email="contact@klaussilveira.com"> Klaus Silveira</span></div><div></div></td> </tr>  </tbody> </table> <div class="spinner"></div> </div></div>
+</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<script>docas={user:"joekychen",repo:"gitlist"};document.write('<script src=' + ('__proto__' in {} ? 'http://cdnjs.cloudflare.com/ajax/libs/zepto/1.0rc1/zepto.min.js':'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js') + '><\/script>')</script>
+<script src="javascript/index.min.js"></script>
+</body>
 </html>

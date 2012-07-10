@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html><head><title>joekychen/gitlist » lib › Git › Repository.php
+
+</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="generator" content="Docco">
+<link rel="stylesheet" media="all" href="../../stylesheets/docco.min.css" />
+
+
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead><tr><th class="docs"><a id="home" href="../../index.html"></a><h1>Repository.php</h1></th><th class="code"></th></tr></thead>
+<tbody>
+
+
+<tr id="section-1"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div></td><td class="code"><div class="highlight"><pre><span class="cp">&lt;?php</span>
+
+<span class="k">namespace</span> <span class="nx">Git</span><span class="p">;</span>
+
+<span class="k">use</span> <span class="nx">Git\Commit\Commit</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">Git\Model\Tree</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">Git\Model\Blob</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">Git\Model\Diff</span><span class="p">;</span>
+
+<span class="k">class</span> <span class="nc">Repository</span>
+<span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$path</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$client</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">__construct</span><span class="p">(</span><span class="nv">$path</span><span class="p">,</span> <span class="nx">Client</span> <span class="nv">$client</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">setPath</span><span class="p">(</span><span class="nv">$path</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">setClient</span><span class="p">(</span><span class="nv">$client</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">setClient</span><span class="p">(</span><span class="nx">Client</span> <span class="nv">$client</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span> <span class="o">=</span> <span class="nv">$client</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getClient</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">create</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nb">mkdir</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getPath</span><span class="p">());</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s1">&#39;init&#39;</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="nv">$this</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getConfig</span><span class="p">(</span><span class="nv">$key</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$key</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s1">&#39;config &#39;</span> <span class="o">.</span> <span class="nv">$key</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nx">trim</span><span class="p">(</span><span class="nv">$key</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">setConfig</span><span class="p">(</span><span class="nv">$key</span><span class="p">,</span> <span class="nv">$value</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s2">&quot;config </span><span class="si">$key</span><span class="s2"> </span><span class="se">\&quot;</span><span class="si">$value</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="nv">$this</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="sd">/**</span>
+<span class="sd">     * Add untracked files</span>
+<span class="sd">     * </span>
+<span class="sd">     * @access public</span>
+<span class="sd">     * @param mixed $files Files to be added to the repository</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">add</span><span class="p">(</span><span class="nv">$files</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">is_array</span><span class="p">(</span><span class="nv">$files</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nv">$files</span> <span class="o">=</span> <span class="nb">implode</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="nv">$files</span><span class="p">);</span>
+        <span class="p">}</span>
+        
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s2">&quot;add </span><span class="si">$files</span><span class="s2">&quot;</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="nv">$this</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Add all untracked files</span>
+<span class="sd">     * </span>
+<span class="sd">     * @access public</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">addAll</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s2">&quot;add -A&quot;</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="nv">$this</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="sd">/**</span>
+<span class="sd">     * Commit changes to the repository</span>
+<span class="sd">     * </span>
+<span class="sd">     * @access public</span>
+<span class="sd">     * @param string $message Description of the changes made</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">commit</span><span class="p">(</span><span class="nv">$message</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s2">&quot;commit -m &#39;</span><span class="si">$message</span><span class="s2">&#39;&quot;</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="nv">$this</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="sd">/**</span>
+<span class="sd">     * Checkout a branch</span>
+<span class="sd">     * </span>
+<span class="sd">     * @access public</span>
+<span class="sd">     * @param string $branch Branch to be checked out</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">checkout</span><span class="p">(</span><span class="nv">$branch</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s2">&quot;checkout </span><span class="si">$branch</span><span class="s2">&quot;</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="nv">$this</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Pull repository changes</span>
+<span class="sd">     * </span>
+<span class="sd">     * @access public</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">pull</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s2">&quot;pull&quot;</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="nv">$this</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="sd">/**</span>
+<span class="sd">     * Update remote references</span>
+<span class="sd">     * </span>
+<span class="sd">     * @access public</span>
+<span class="sd">     * @param string $repository Repository to be pushed</span>
+<span class="sd">     * @param string $refspec Refspec for the push</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">push</span><span class="p">(</span><span class="nv">$repository</span> <span class="o">=</span> <span class="k">null</span><span class="p">,</span> <span class="nv">$refspec</span> <span class="o">=</span> <span class="k">null</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$command</span> <span class="o">=</span> <span class="s2">&quot;push&quot;</span><span class="p">;</span>
+        
+        <span class="k">if</span><span class="p">(</span><span class="nv">$repository</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$command</span> <span class="o">.=</span> <span class="s2">&quot; </span><span class="si">$repository</span><span class="s2">&quot;</span><span class="p">;</span>
+        <span class="p">}</span> 
+        
+        <span class="k">if</span><span class="p">(</span><span class="nv">$refspec</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$command</span> <span class="o">.=</span> <span class="s2">&quot; </span><span class="si">$refspec</span><span class="s2">&quot;</span><span class="p">;</span>
+        <span class="p">}</span>
+        
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="nv">$command</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="nv">$this</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="sd">/**</span>
+<span class="sd">     * Show a list of the repository branches</span>
+<span class="sd">     * </span>
+<span class="sd">     * @access public</span>
+<span class="sd">     * @return array List of branches</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getBranches</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$branches</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s2">&quot;branch&quot;</span><span class="p">);</span>
+        <span class="nv">$branches</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nv">$branches</span><span class="p">);</span>
+        <span class="nv">$branches</span> <span class="o">=</span> <span class="nb">array_filter</span><span class="p">(</span><span class="nb">preg_replace</span><span class="p">(</span><span class="s1">&#39;/[\*\s]/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nv">$branches</span><span class="p">));</span>
+        
+        <span class="k">return</span> <span class="nv">$branches</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="sd">/**</span>
+<span class="sd">     * Show the current repository branch</span>
+<span class="sd">     * </span>
+<span class="sd">     * @access public</span>
+<span class="sd">     * @return string Current repository branch</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getCurrentBranch</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$branches</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s2">&quot;branch&quot;</span><span class="p">);</span>
+        <span class="nv">$branches</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nv">$branches</span><span class="p">);</span>
+        
+        <span class="k">foreach</span><span class="p">(</span><span class="nv">$branches</span> <span class="k">as</span> <span class="nv">$branch</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="nv">$branch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">substr</span><span class="p">(</span><span class="nv">$branch</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    
+    <span class="sd">/**</span>
+<span class="sd">     * Check if a specified branch exists</span>
+<span class="sd">     * </span>
+<span class="sd">     * @access public</span>
+<span class="sd">     * @param string $branch Branch to be checked</span>
+<span class="sd">     * @return boolean True if the branch exists</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">hasBranch</span><span class="p">(</span><span class="nv">$branch</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$branches</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getBranches</span><span class="p">();</span>
+        <span class="nv">$status</span> <span class="o">=</span> <span class="nb">in_array</span><span class="p">(</span><span class="nv">$branch</span><span class="p">,</span> <span class="nv">$branches</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nv">$status</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Create a new repository branch</span>
+<span class="sd">     * </span>
+<span class="sd">     * @access public</span>
+<span class="sd">     * @param string $branch Branch name</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">createBranch</span><span class="p">(</span><span class="nv">$branch</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s2">&quot;branch </span><span class="si">$branch</span><span class="s2">&quot;</span><span class="p">);</span>
+    <span class="p">}</span>
+    
+    <span class="sd">/**</span>
+<span class="sd">     * Show a list of the repository tags</span>
+<span class="sd">     * </span>
+<span class="sd">     * @access public</span>
+<span class="sd">     * @return array List of tags</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getTags</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$tags</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s2">&quot;tag&quot;</span><span class="p">);</span>
+        <span class="nv">$tags</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nv">$tags</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$tags</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">NULL</span><span class="p">;</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="nv">$tags</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Show the amount of commits on the repository</span>
+<span class="sd">     * </span>
+<span class="sd">     * @access public</span>
+<span class="sd">     * @return integer Total number of commits</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getTotalCommits</span><span class="p">(</span><span class="nv">$file</span> <span class="o">=</span> <span class="k">null</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$command</span> <span class="o">=</span> <span class="s2">&quot;rev-list --all&quot;</span><span class="p">;</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="nv">$file</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$command</span> <span class="o">.=</span> <span class="s2">&quot; </span><span class="si">$file</span><span class="s2">&quot;</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="nv">$command</span> <span class="o">.=</span> <span class="s2">&quot; | wc -l&quot;</span><span class="p">;</span>
+
+        <span class="nv">$commits</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="nv">$command</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nv">$commits</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="sd">/**</span>
+<span class="sd">     * Show the repository commit log</span>
+<span class="sd">     * </span>
+<span class="sd">     * @access public</span>
+<span class="sd">     * @return array Commit log</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getCommits</span><span class="p">(</span><span class="nv">$file</span> <span class="o">=</span> <span class="k">null</span><span class="p">,</span> <span class="nv">$page</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$page</span> <span class="o">=</span> <span class="mi">15</span> <span class="o">*</span> <span class="nv">$page</span><span class="p">;</span>
+        <span class="nv">$pager</span> <span class="o">=</span> <span class="s2">&quot;--skip=</span><span class="si">$page</span><span class="s2"> --max-count=15&quot;</span><span class="p">;</span>
+        <span class="nv">$command</span> <span class="o">=</span> <span class="s1">&#39;log &#39;</span> <span class="o">.</span> <span class="nv">$pager</span> <span class="o">.</span> <span class="s1">&#39; --pretty=format:\&#39;&quot;%h&quot;: {&quot;hash&quot;: &quot;%H&quot;, &quot;short_hash&quot;: &quot;%h&quot;, &quot;tree&quot;: &quot;%T&quot;, &quot;parent&quot;: &quot;%P&quot;, &quot;author&quot;: &quot;%an&quot;, &quot;author_email&quot;: &quot;%ae&quot;, &quot;date&quot;: &quot;%at&quot;, &quot;commiter&quot;: &quot;%cn&quot;, &quot;commiter_email&quot;: &quot;%ce&quot;, &quot;commiter_date&quot;: &quot;%ct&quot;, &quot;message&quot;: &quot;%f&quot;}\&#39;&#39;</span><span class="p">;</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="nv">$file</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$command</span> <span class="o">.=</span> <span class="s2">&quot; </span><span class="si">$file</span><span class="s2">&quot;</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="nv">$logs</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="nv">$command</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$logs</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nx">\RuntimeException</span><span class="p">(</span><span class="s1">&#39;No commit log available&#39;</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nv">$logs</span> <span class="o">=</span> <span class="nb">str_replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="nv">$logs</span><span class="p">);</span>
+        <span class="nv">$logs</span> <span class="o">=</span> <span class="nb">json_decode</span><span class="p">(</span><span class="s2">&quot;{ </span><span class="si">$logs</span><span class="s2"> }&quot;</span><span class="p">,</span> <span class="k">true</span><span class="p">);</span>
+
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$logs</span> <span class="k">as</span> <span class="nv">$log</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$log</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str_replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="nv">$log</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]);</span>
+            <span class="nv">$commit</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Commit</span><span class="p">;</span>
+            <span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">importData</span><span class="p">(</span><span class="nv">$log</span><span class="p">);</span>
+            <span class="nv">$commits</span><span class="p">[]</span> <span class="o">=</span> <span class="nv">$commit</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="nv">$commits</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getRelatedCommits</span><span class="p">(</span><span class="nv">$hash</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$logs</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s1">&#39;log --pretty=format:\&#39;&quot;%h&quot;: {&quot;hash&quot;: &quot;%H&quot;, &quot;short_hash&quot;: &quot;%h&quot;, &quot;tree&quot;: &quot;%T&quot;, &quot;parent&quot;: &quot;%P&quot;, &quot;author&quot;: &quot;%an&quot;, &quot;author_email&quot;: &quot;%ae&quot;, &quot;date&quot;: &quot;%at&quot;, &quot;commiter&quot;: &quot;%cn&quot;, &quot;commiter_email&quot;: &quot;%ce&quot;, &quot;commiter_date&quot;: &quot;%ct&quot;, &quot;message&quot;: &quot;%f&quot;}\&#39;&#39;</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$logs</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nx">\RuntimeException</span><span class="p">(</span><span class="s1">&#39;No commit log available&#39;</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nv">$logs</span> <span class="o">=</span> <span class="nb">str_replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="nv">$logs</span><span class="p">);</span>
+        <span class="nv">$logs</span> <span class="o">=</span> <span class="nb">json_decode</span><span class="p">(</span><span class="s2">&quot;{ </span><span class="si">$logs</span><span class="s2"> }&quot;</span><span class="p">,</span> <span class="k">true</span><span class="p">);</span>
+
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$logs</span> <span class="k">as</span> <span class="nv">$log</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$log</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str_replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="nv">$log</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]);</span>
+            <span class="nv">$logTree</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s1">&#39;diff-tree -t -r &#39;</span> <span class="o">.</span> <span class="nv">$log</span><span class="p">[</span><span class="s1">&#39;hash&#39;</span><span class="p">]);</span>
+            <span class="nv">$lines</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nv">$logTree</span><span class="p">);</span>
+            <span class="nb">array_shift</span><span class="p">(</span><span class="nv">$lines</span><span class="p">);</span>
+            <span class="nv">$files</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+
+            <span class="k">foreach</span> <span class="p">(</span><span class="nv">$lines</span> <span class="k">as</span> <span class="nv">$key</span> <span class="o">=&gt;</span> <span class="nv">$line</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$line</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nb">unset</span><span class="p">(</span><span class="nv">$lines</span><span class="p">[</span><span class="nv">$key</span><span class="p">]);</span>
+                    <span class="k">continue</span><span class="p">;</span>
+                <span class="p">}</span>
+
+                <span class="nv">$files</span><span class="p">[]</span> <span class="o">=</span> <span class="nb">preg_split</span><span class="p">(</span><span class="s2">&quot;/[\s]+/&quot;</span><span class="p">,</span> <span class="nv">$line</span><span class="p">);</span>
+            <span class="p">}</span></pre></div></td></tr>
+
+
+<tr id="section-2"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-2">&#182;</a></div><p>Now let's find the commits who have our hash within them</p></td><td class="code"><div class="highlight"><pre>            <span class="k">foreach</span> <span class="p">(</span><span class="nv">$files</span> <span class="k">as</span> <span class="nv">$file</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nv">$file</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;commit&#39;</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">continue</span><span class="p">;</span>
+                <span class="p">}</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nv">$file</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="nv">$hash</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nv">$commit</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Commit</span><span class="p">;</span>
+                    <span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">importData</span><span class="p">(</span><span class="nv">$log</span><span class="p">);</span>
+                    <span class="nv">$commits</span><span class="p">[]</span> <span class="o">=</span> <span class="nv">$commit</span><span class="p">;</span>
+                    <span class="k">break</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="nv">$commits</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getCommit</span><span class="p">(</span><span class="nv">$commit</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$logs</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s1">&#39;show --pretty=format:\&#39;{&quot;hash&quot;: &quot;%H&quot;, &quot;short_hash&quot;: &quot;%h&quot;, &quot;tree&quot;: &quot;%T&quot;, &quot;parent&quot;: &quot;%P&quot;, &quot;author&quot;: &quot;%an&quot;, &quot;author_email&quot;: &quot;%ae&quot;, &quot;date&quot;: &quot;%at&quot;, &quot;commiter&quot;: &quot;%cn&quot;, &quot;commiter_email&quot;: &quot;%ce&quot;, &quot;commiter_date&quot;: &quot;%ct&quot;, &quot;message&quot;: &quot;%f&quot;}\&#39; &#39;</span> <span class="o">.</span> <span class="nv">$commit</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$logs</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nx">\RuntimeException</span><span class="p">(</span><span class="s1">&#39;No commit log available&#39;</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nv">$logs</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nv">$logs</span><span class="p">);</span></pre></div></td></tr>
+
+
+<tr id="section-3"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-3">&#182;</a></div><p>Read commit metadata</p></td><td class="code"><div class="highlight"><pre>        <span class="nv">$data</span> <span class="o">=</span> <span class="nb">json_decode</span><span class="p">(</span><span class="nv">$logs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="k">true</span><span class="p">);</span>
+        <span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str_replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]);</span>
+        <span class="nv">$commit</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Commit</span><span class="p">;</span>
+        <span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">importData</span><span class="p">(</span><span class="nv">$data</span><span class="p">);</span>
+        <span class="nb">unset</span><span class="p">(</span><span class="nv">$logs</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$logs</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nx">\RuntimeException</span><span class="p">(</span><span class="s1">&#39;No commit log available&#39;</span><span class="p">);</span>
+        <span class="p">}</span></pre></div></td></tr>
+
+
+<tr id="section-4"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-4">&#182;</a></div><p>Read diff logs</p></td><td class="code"><div class="highlight"><pre>        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$logs</span> <span class="k">as</span> <span class="nv">$log</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;diff&#39;</span> <span class="o">===</span> <span class="nx">substr</span><span class="p">(</span><span class="nv">$log</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$diff</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nv">$diffs</span><span class="p">[]</span> <span class="o">=</span> <span class="nv">$diff</span><span class="p">;</span>
+                <span class="p">}</span>
+
+                <span class="nv">$diff</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Diff</span><span class="p">;</span>
+                <span class="nb">preg_match</span><span class="p">(</span><span class="s1">&#39;/^diff --[\S]+ (a\/)?([\S]+)( b\/)?/&#39;</span><span class="p">,</span> <span class="nv">$log</span><span class="p">,</span> <span class="nv">$name</span><span class="p">);</span>
+                <span class="nv">$diff</span><span class="o">-&gt;</span><span class="na">setFile</span><span class="p">(</span><span class="nv">$name</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+                <span class="k">continue</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;index&#39;</span> <span class="o">===</span> <span class="nx">substr</span><span class="p">(</span><span class="nv">$log</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nv">$diff</span><span class="o">-&gt;</span><span class="na">setIndex</span><span class="p">(</span><span class="nv">$log</span><span class="p">);</span>
+                <span class="k">continue</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;---&#39;</span> <span class="o">===</span> <span class="nx">substr</span><span class="p">(</span><span class="nv">$log</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nv">$diff</span><span class="o">-&gt;</span><span class="na">setOld</span><span class="p">(</span><span class="nv">$log</span><span class="p">);</span>
+                <span class="k">continue</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;+++&#39;</span> <span class="o">===</span> <span class="nx">substr</span><span class="p">(</span><span class="nv">$log</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nv">$diff</span><span class="o">-&gt;</span><span class="na">setNew</span><span class="p">(</span><span class="nv">$log</span><span class="p">);</span>
+                <span class="k">continue</span><span class="p">;</span>
+            <span class="p">}</span></pre></div></td></tr>
+
+
+<tr id="section-5"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-5">&#182;</a></div><p>Handle binary files properly.</p></td><td class="code"><div class="highlight"><pre>            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;Binary&#39;</span> <span class="o">===</span> <span class="nx">substr</span><span class="p">(</span><span class="nv">$log</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nv">$m</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">preg_match</span><span class="p">(</span><span class="s1">&#39;/Binary files (.+) and (.+) differ/&#39;</span><span class="p">,</span> <span class="nv">$log</span><span class="p">,</span> <span class="nv">$m</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nv">$diff</span><span class="o">-&gt;</span><span class="na">setOld</span><span class="p">(</span><span class="nv">$m</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+                    <span class="nv">$diff</span><span class="o">-&gt;</span><span class="na">setNew</span><span class="p">(</span><span class="s2">&quot;    </span><span class="si">{</span><span class="nv">$m</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+
+            <span class="nv">$diff</span><span class="o">-&gt;</span><span class="na">addLine</span><span class="p">(</span><span class="nv">$log</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$diff</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nv">$diffs</span><span class="p">[]</span> <span class="o">=</span> <span class="nv">$diff</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">setDiffs</span><span class="p">(</span><span class="nv">$diffs</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="nv">$commit</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getAuthorStatistics</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$logs</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s1">&#39;log --pretty=format:\&#39;%an||%ae\&#39;&#39;</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$logs</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nx">\RuntimeException</span><span class="p">(</span><span class="s1">&#39;No statistics available&#39;</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nv">$logs</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nv">$logs</span><span class="p">);</span>
+        <span class="nv">$logs</span> <span class="o">=</span> <span class="nb">array_count_values</span><span class="p">(</span><span class="nv">$logs</span><span class="p">);</span>
+        <span class="nb">arsort</span><span class="p">(</span><span class="nv">$logs</span><span class="p">);</span>
+
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$logs</span> <span class="k">as</span> <span class="nv">$user</span> <span class="o">=&gt;</span> <span class="nv">$count</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$user</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s1">&#39;||&#39;</span><span class="p">,</span> <span class="nv">$user</span><span class="p">);</span>
+            <span class="nv">$data</span><span class="p">[]</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;name&#39;</span> <span class="o">=&gt;</span> <span class="nv">$user</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;email&#39;</span> <span class="o">=&gt;</span> <span class="nv">$user</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;commits&#39;</span> <span class="o">=&gt;</span> <span class="nv">$count</span><span class="p">);</span> 
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="nv">$data</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Get the current HEAD.</span>
+<span class="sd">     *</span>
+<span class="sd">     * @return string the name of the HEAD branch.</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getHead</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">file_exists</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getPath</span><span class="p">()</span> <span class="o">.</span> <span class="s1">&#39;/.git/HEAD&#39;</span><span class="p">))</span> <span class="p">{</span>
+          <span class="nv">$file</span> <span class="o">=</span> <span class="o">@</span><span class="nb">file_get_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getPath</span><span class="p">()</span> <span class="o">.</span> <span class="s1">&#39;/.git/HEAD&#39;</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nb">file_exists</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getPath</span><span class="p">()</span> <span class="o">.</span> <span class="s1">&#39;/HEAD&#39;</span><span class="p">))</span> <span class="p">{</span>
+          <span class="nv">$file</span> <span class="o">=</span> <span class="o">@</span><span class="nb">file_get_contents</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getPath</span><span class="p">()</span> <span class="o">.</span> <span class="s1">&#39;/HEAD&#39;</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">else</span>  <span class="p">{</span>
+          <span class="k">return</span> <span class="s1">&#39;master&#39;</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">foreach</span> <span class="p">(</span><span class="nb">explode</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nv">$file</span><span class="p">)</span> <span class="k">as</span> <span class="nv">$line</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$m</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">preg_match</span><span class="p">(</span><span class="s1">&#39;#ref:\srefs/heads/(.+)#&#39;</span><span class="p">,</span> <span class="nv">$line</span><span class="p">,</span> <span class="nv">$m</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nv">$m</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+            <span class="p">}</span>
+        <span class="p">}</span></pre></div></td></tr>
+
+
+<tr id="section-6"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-6">&#182;</a></div><p>Default to something sane if in a detached HEAD state.</p></td><td class="code"><div class="highlight"><pre>        <span class="k">return</span> <span class="s1">&#39;master&#39;</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getStatistics</span><span class="p">(</span><span class="nv">$branch</span><span class="p">)</span>
+    <span class="p">{</span></pre></div></td></tr>
+
+
+<tr id="section-7"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-7">&#182;</a></div><p>Calculate amount of files, extensions and file size</p></td><td class="code"><div class="highlight"><pre>        <span class="nv">$logs</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s1">&#39;ls-tree -r -l &#39;</span> <span class="o">.</span> <span class="nv">$branch</span><span class="p">);</span>
+        <span class="nv">$lines</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nv">$logs</span><span class="p">);</span>
+        <span class="nv">$files</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+        <span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;extensions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+        <span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$lines</span> <span class="k">as</span> <span class="nv">$key</span> <span class="o">=&gt;</span> <span class="nv">$line</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$line</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nb">unset</span><span class="p">(</span><span class="nv">$lines</span><span class="p">[</span><span class="nv">$key</span><span class="p">]);</span>
+                <span class="k">continue</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="nv">$files</span><span class="p">[]</span> <span class="o">=</span> <span class="nb">preg_split</span><span class="p">(</span><span class="s2">&quot;/[\s]+/&quot;</span><span class="p">,</span> <span class="nv">$line</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$files</span> <span class="k">as</span> <span class="nv">$file</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nv">$file</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;blob&#39;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]</span><span class="o">++</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nb">is_numeric</span><span class="p">(</span><span class="nv">$file</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span> <span class="p">{</span>
+                <span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="nv">$file</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">((</span><span class="nv">$pos</span> <span class="o">=</span> <span class="nb">strrpos</span><span class="p">(</span><span class="nv">$file</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="s1">&#39;.&#39;</span><span class="p">))</span> <span class="o">!==</span> <span class="k">FALSE</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;extensions&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="nx">substr</span><span class="p">(</span><span class="nv">$file</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="nv">$pos</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;extensions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">array_count_values</span><span class="p">(</span><span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;extensions&#39;</span><span class="p">]);</span>
+        <span class="nb">arsort</span><span class="p">(</span><span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;extensions&#39;</span><span class="p">]);</span>
+
+        <span class="k">return</span> <span class="nv">$data</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Get the Tree for the provided folder</span>
+<span class="sd">     * </span>
+<span class="sd">     * @param string $tree Folder that will be parsed</span>
+<span class="sd">     * @return Tree Instance of Tree for the provided folder</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getTree</span><span class="p">(</span><span class="nv">$tree</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$tree</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Tree</span><span class="p">(</span><span class="nv">$tree</span><span class="p">,</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">(),</span> <span class="nv">$this</span><span class="p">);</span>
+        <span class="nv">$tree</span><span class="o">-&gt;</span><span class="na">parse</span><span class="p">();</span>
+        <span class="k">return</span> <span class="nv">$tree</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Get the Blob for the provided file</span>
+<span class="sd">     * </span>
+<span class="sd">     * @param string $blob File that will be parsed</span>
+<span class="sd">     * @return Blob Instance of Blob for the provided file</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getBlob</span><span class="p">(</span><span class="nv">$blob</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nx">Blob</span><span class="p">(</span><span class="nv">$blob</span><span class="p">,</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">(),</span> <span class="nv">$this</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Blames the provided file and parses the output</span>
+<span class="sd">     * </span>
+<span class="sd">     * @param string $file File that will be blamed</span>
+<span class="sd">     * @return array Commits hashes containing the lines</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getBlame</span><span class="p">(</span><span class="nv">$file</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$blame</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+        <span class="nv">$logs</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getClient</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s2">&quot;blame -s </span><span class="si">$file</span><span class="s2">&quot;</span><span class="p">);</span>
+        <span class="nv">$logs</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nv">$logs</span><span class="p">);</span>
+
+        <span class="nv">$i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nv">$previous_commit</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$logs</span> <span class="k">as</span> <span class="nv">$log</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nv">$log</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">continue</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="nb">preg_match_all</span><span class="p">(</span><span class="s2">&quot;/([a-zA-Z0-9^]{8})\s+.*?([0-9]+)\)(.+)/&quot;</span><span class="p">,</span> <span class="nv">$log</span><span class="p">,</span> <span class="nv">$match</span><span class="p">);</span>
+
+            <span class="nv">$current_commit</span> <span class="o">=</span> <span class="nv">$match</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nv">$current_commit</span> <span class="o">!=</span> <span class="nv">$previous_commit</span><span class="p">)</span> <span class="p">{</span>
+                <span class="o">++</span><span class="nv">$i</span><span class="p">;</span>
+                <span class="nv">$blame</span><span class="p">[</span><span class="nv">$i</span><span class="p">]</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;line&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;commit&#39;</span> <span class="o">=&gt;</span> <span class="nv">$current_commit</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="nv">$blame</span><span class="p">[</span><span class="nv">$i</span><span class="p">][</span><span class="s1">&#39;line&#39;</span><span class="p">]</span> <span class="o">.=</span> <span class="nx">PHP_EOL</span> <span class="o">.</span> <span class="nv">$match</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>
+            <span class="nv">$previous_commit</span> <span class="o">=</span> <span class="nv">$current_commit</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="nv">$blame</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Get the current Repository path</span>
+<span class="sd">     * </span>
+<span class="sd">     * @return string Path where the repository is located</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">getPath</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">path</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Set the current Repository path</span>
+<span class="sd">     * </span>
+<span class="sd">     * @param string $path Path where the repository is located</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">setPath</span><span class="p">(</span><span class="nv">$path</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">path</span> <span class="o">=</span> <span class="nv">$path</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+</pre></div></td></tr>
+
+</tbody>
+</table>
+</div>
+
+</body>
+<script>docas={repo:"joekychen/gitlist",depth:2}</script>
+<script>document.write('<script src=' + ('__proto__' in {} ? 'http://cdnjs.cloudflare.com/ajax/libs/zepto/1.0rc1/zepto.min.js' : 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')+'><\\/script>')</script>
+<script src="http://baoshan.github.com/moment/min/moment.min.js"></script>
+<script src="../../javascript/docco.min.js"></script>
+</html>

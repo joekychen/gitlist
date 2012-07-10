@@ -1,0 +1,16 @@
+f | layout.twig | g | 832B |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644258 |  | fixed URL management
+f | branch_menu.twig | g | 629B |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | refactored the tree controller
+f | blame.twig | g | 694B |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | moved the page variable to the templates (belongs to the view)
+f | breadcrumb.twig | g | 490B |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | refactored the tree controller
+f | navigation.twig | g | 846B |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644258 |  | fixed URL management
+f | footer.twig | g | 104B |  | Klaus Silveira | contact@klaussilveira.com | 1337315913 |  | Initial commit
+f | tree.twig | g | 2.2K |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | moved the page variable to the templates (belongs to the view)
+f | menu.twig | g | 438B |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | refactored the tree controller
+f | layout_page.twig | g | 492B |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | added another layer
+f | error.twig | g | 300B |  | Michał Prochowski | michal@prochowski.pl | 1339364399 |  | Changed page title from 'Gitlist' to 'GitList'.
+f | file.twig | g | 1.1K |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | moved the page variable to the templates (belongs to the view)
+f | stats.twig | g | 1.5K |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | moved the page variable to the templates (belongs to the view)
+f | commit.twig | g | 1.9K |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | moved the page variable to the templates (belongs to the view)
+f | commits.twig | g | 1.6K |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644262 |  | moved the page variable to the templates (belongs to the view)
+f | index.twig | g | 723B |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644258 |  | fixed URL management
+f | rss.twig | g | 714B |  | Fabien Potencier | fabien.potencier@gmail.com | 1341644258 |  | fixed URL management
